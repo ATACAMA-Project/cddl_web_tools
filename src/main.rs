@@ -1,3 +1,5 @@
+mod validation;
+
 #[macro_use]
 extern crate rocket;
 
