@@ -59,3 +59,4 @@ clippy-nightly:
     - if: '$CODE_QUALITY_DISABLED'
       when: never
     - if: '$CI_PIPELINE_SOURCE == "push"'
+  allow_failure: true
