@@ -12,6 +12,8 @@ rust-latest:
 clippy-latest:
   stage: format
   image: rust:latest
+  needs:
+    - rust-latest
   before_script:
     - rustup component add clippy
     - cargo install gitlab_clippy
@@ -40,6 +42,8 @@ rust-nightly:
 clippy-nightly:
   stage: format
   image: rustlang/rust:nightly
+  needs:
+    - rust-nightly
   before_script:
     - rustup component add clippy
     - cargo install gitlab_clippy
