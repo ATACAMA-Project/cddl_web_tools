@@ -1,0 +1,61 @@
+stages:
+  - build
+  - format
+
+rust-latest:
+  stage: build
+  image: rust:latest
+  script:
+    - cargo build --verbose
+    - cargo test --verbose
+
+clippy-latest:
+  stage: format
+  image: rust:latest
+  needs:
+    - rust-latest
+  before_script:
+    - rustup component add clippy
+    - cargo install gitlab_clippy
+  script:
+    - cargo clippy
+  after_script:
+    - cargo clippy --message-format=json | gitlab-clippy > gl-code-quality-report.json
+  artifacts:
+    reports:
+      codequality: gl-code-quality-report.json
+    expire_in: 1 week
+  rules:
+    - if: '$CODE_QUALITY_DISABLED'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+
+
+rust-nightly:
+  stage: build
+  image: rustlang/rust:nightly
+  script:
+    - cargo build --verbose
+    - cargo test --verbose
+  allow_failure: true
+
+clippy-nightly:
+  stage: format
+  image: rustlang/rust:nightly
+  needs:
+    - rust-nightly
+  before_script:
+    - rustup component add clippy
+    - cargo install gitlab_clippy
+  script:
+    - cargo clippy
+  after_script:
+    - cargo clippy --message-format=json | gitlab-clippy > gl-code-quality-report.json
+  artifacts:
+    reports:
+      codequality: gl-code-quality-report.json
+    expire_in: 1 week
+  rules:
+    - if: '$CODE_QUALITY_DISABLED'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "push"'
