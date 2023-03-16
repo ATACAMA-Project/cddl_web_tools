@@ -13,4 +13,9 @@ cuddle = "0.1.0"
 
 [dependencies.rocket_dyn_templates]
 version = "0.1.0-rc.2"
-features = ["handlebars", "tera"]
+features = ["tera"]
+
+[dependencies.rocket_contrib]
+version = "0.4.5"
+default-features = false
+features = ["json"]
