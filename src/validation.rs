@@ -1,7 +1,6 @@
 use cddl::{cddl_from_str, validate_cbor_from_slice, validate_json_from_str};
 use cddl_cat::{parse_cddl as parse_cat, validate_cbor_bytes, validate_json_str, ValidateResult};
 use cuddle::{cddl::Cddl, parse_cddl as parse_cuddle};
-use std::any::Any;
 
 pub struct ValidationData {
     cddl: String,
@@ -80,7 +79,7 @@ where
         .unwrap()
         .rules
         .iter()
-        .find(|r| f(&*r.name).is_ok())
+        .find(|r| f(&r.name).is_ok())
         .ok_or_else(|| "No matching rule found".to_string())
         .map(|_| ())
 }
