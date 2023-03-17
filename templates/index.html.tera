@@ -1,12 +1,12 @@
 {% extends "base" %}
 
 {% block title %}
-Index
+CDDL Validation
 {% endblock title %}
 
 {% block content %}
-    <h1>Hi {{name}}</h1>
-    <h3>Here are your items:</h3>
-
-    <p>Try going to <a href="/hello/YourName">/hello/YourName</a></p>
+    <form action="/validate" method="POST">
+        <textarea name="cddl"></textarea>
+        <input type="submit" value="Validate">
+    </form>
 {% endblock content %}

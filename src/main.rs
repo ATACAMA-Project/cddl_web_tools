@@ -5,6 +5,7 @@ extern crate rocket_dyn_templates;
 
 use rocket::Request;
 use rocket::{Build, Rocket};
+use rocket::form::Form;
 use rocket_dyn_templates::{context, Template};
 use rocket::fs::{FileServer, relative};
 
@@ -15,11 +16,24 @@ fn index() -> Template {
     })
 }
 
+#[derive(Debug, FromForm)]
+struct Validation<'r> {
+    cdll: &'r str,
+}
+
+#[post("/validate", data = "<validation_data>")]
+fn validate(validation_data: Option<Form<Validation<'_>>>) -> Template {
+    println!("Task: {:?}", validation_data);
+    Template::render("index", context! {
+        name: "2",
+    })
+}
+
 #[launch]
 fn rocket() -> Rocket<Build> {
     rocket::build()
-        .mount("/", routes![index])
-        .mount("/", FileServer::from(relative!("static")))
+        .mount("/", routes![index, validate])
+        .mount("/static", FileServer::from(relative!("static")))
         .attach(Template::fairing())
         .register("/", catchers![not_found])
 }
