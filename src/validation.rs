@@ -26,7 +26,7 @@ pub enum ValidationType {
     WithCbor,
 }
 
-static FILENAME: &str = "cddl";
+static FILENAME: &str = "cddl.cddl";
 
 pub fn validate(
     data: ValidationData,
@@ -88,60 +88,8 @@ where
 mod tests {
     use super::*;
 
-    const CDDL: &str = "reputation-object = {
-  application: text
-  reputons: [* reputon]
-}
-
-reputon = {
-  rater: text
-  assertion: text
-  rated: text
-  rating: float16
-  ? confidence: float16
-  ? normal-rating: float16
-  ? sample-size: uint
-  ? generated: uint
-  ? expires: uint
-  * text => any
-}";
-    const JSON: &str = r#"{
-  "application": "conchometry",
-  "reputons": [
-    {
-      "rater": "Ephthianura",
-      "assertion": "codding",
-      "rated": "sphaerolitic",
-      "rating": 0.34133473256800795,
-      "confidence": 0.9481983064298332,
-      "expires": 1568,
-      "unplaster": "grassy"
-    },
-    {
-      "rater": "nonchargeable",
-      "assertion": "raglan",
-      "rated": "alienage",
-      "rating": 0.5724646875815566,
-      "sample-size": 3514,
-      "Aldebaran": "unchurched",
-      "puruloid": "impersonable",
-      "uninfracted": "pericarpoidal",
-      "schorl": "Caro"
-    },
-    {
-      "rater": "precollectable",
-      "assertion": "Merat",
-      "rated": "thermonatrite",
-      "rating": 0.19164006323936977,
-      "confidence": 0.6065252103391268,
-      "normal-rating": 0.5187773690879303,
-      "generated": 899,
-      "speedy": "solidungular",
-      "noviceship": "medicine",
-      "checkrow": "epidictic"
-    }
-  ]
-}"#;
+    const CDDL: &str = include_str!("../tests/cddl.cddl");
+    const JSON: &str = include_str!("../tests/cddl.json");
 
     #[test]
     fn cddl_plain() {
