@@ -5,8 +5,9 @@ CDDL Validation
 {% endblock title %}
 
 {% block content %}
-    <form action="/validate" method="POST">
+    <form action="/" method="POST">
         <textarea name="cddl"></textarea>
         <input type="submit" value="Validate">
     </form>
+    {{ cddl }}
 {% endblock content %}

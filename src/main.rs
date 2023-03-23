@@ -12,7 +12,7 @@ use rocket::fs::{FileServer, relative};
 #[get("/")]
 fn index() -> Template {
     Template::render("index", context! {
-        name: "1",
+        cddl: "",
     })
 }
 
@@ -21,12 +21,16 @@ struct Validation<'r> {
     cddl: &'r str,
 }
 
-#[post("/validate", data = "<validation_data>")]
+#[post("/", data = "<validation_data>")]
 fn validate(validation_data: Option<Form<Validation<'_>>>) -> Template {
-    println!("Task: {:?}", validation_data);
-    Template::render("index", context! {
-        name: "2",
-    })
+    match validation_data {
+        None => index(),
+        Some(data) => {
+            Template::render("index", context! {
+                cddl: data.cddl,
+            })
+        }
+    }
 }
 
 #[launch]
