@@ -18,7 +18,7 @@ fn index() -> Template {
 
 #[derive(Debug, FromForm)]
 struct Validation<'r> {
-    cdll: &'r str,
+    cddl: &'r str,
 }
 
 #[post("/validate", data = "<validation_data>")]
