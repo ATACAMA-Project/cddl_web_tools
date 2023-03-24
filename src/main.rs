@@ -44,7 +44,7 @@ fn rocket() -> Rocket<Build> {
 
 #[catch(404)]
 fn not_found(req: &Request) -> Template {
-    Template::render("error",context! {
+    Template::render("error", context! {
         title: "404",
         details: format!("The following page was not found {}", req.uri()),
     })

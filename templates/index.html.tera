@@ -6,8 +6,11 @@ CDDL Validation
 
 {% block content %}
     <form action="/" method="POST">
-        <textarea name="cddl"></textarea>
-        <input type="submit" value="Validate">
+      <div class="mb-3">
+        <label for="cddlInput" class="form-label">CDDL</label>
+        <textarea class="form-control" id="cddlInput" name="cddl" rows="3"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
     </form>
     {{ cddl }}
 {% endblock content %}
