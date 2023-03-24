@@ -6,9 +6,19 @@ CDDL Validation
 
 {% block content %}
     <form action="/" method="POST">
-      <div class="mb-3">
-        <label for="cddlInput" class="form-label">CDDL</label>
-        <textarea class="form-control" id="cddlInput" name="cddl" rows="3"></textarea>
+      <div class='row'>
+       <div class='col-md-6'>
+          <div class="form-group">
+            <label for="cddlInput" class="form-label">CDDL</label>
+            <textarea class="form-control" id="cddlInput" name="cddl" rows="3"></textarea>
+          </div>
+       </div>
+       <div class='col-md-6'>
+          <div class="form-group">
+            <label for="extra" class="form-label">extra</label>
+            <textarea class="form-control" id="extra" name="extra" rows="3"></textarea>
+          </div>
+       </div>
       </div>
       <button type="submit" class="btn btn-primary">Submit</button>
     </form>
