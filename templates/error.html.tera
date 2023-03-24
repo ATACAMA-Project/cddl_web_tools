@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>{{ title }}</title>
-        <link rel="stylesheet" href="/static/error.css">
-    </head>
-    <body>
-        <div class="infobox">
-            <h1>{{ title }}</h1>
-            <p>
-                {{ details }}
-            </p>
-        </div>
-        <div class="imgbox" style="background-image: url('/static/sloth.svg');"></div>
-    </body>
+<head>
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="/static/error.css">
+</head>
+<body>
+  <div class="infobox">
+    <h1>{{ title }}</h1>
+    <p>
+      {{ details }}
+    </p>
+  </div>
+  <div class="imgbox" style="background-image: url('/static/sloth.svg');"></div>
+</body>
 </html>

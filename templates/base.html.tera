@@ -1,22 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}{% endblock title %} - CDDL Web Tools</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
-  </head>
-  <body class="p-3 m-0 border-0">
-    <header class="d-flex justify-content-center py-3">
-      {# get from internal library #}
-      <ul class="nav nav-pills">
-        <li class="nav-item"><a href="#" class="nav-link active" aria-current="page">Plain</a></li>
-        <li class="nav-item"><a href="#" class="nav-link">WithJson</a></li>
-        <li class="nav-item"><a href="#" class="nav-link">WithCbor</a></li>
-      </ul>
-    <div></div>
-    </header>
-    {% block content %}{% endblock content %}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
-  </body>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock title %} - CDDL Web Tools</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+</head>
+<body class="p-3 m-0 border-0">
+  <header class="d-flex justify-content-center py-3">
+    {# get from internal library #}
+    <ul class="nav nav-pills">
+      <li class="nav-item"><a href="#" class="nav-link active" aria-current="page">Plain</a></li>
+      <li class="nav-item"><a href="#" class="nav-link">WithJson</a></li>
+      <li class="nav-item"><a href="#" class="nav-link">WithCbor</a></li>
+    </ul>
+  </header>
+  {% block content %}{% endblock content %}
+    <div class="row">
+      <div class="col-md-4">
+        <h2 class="text-center">Why this Site?</h2>
+        <p class="text-justify">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse aliquet quam
+          nulla, eu lobortis dolor tincidunt vitae. Maecenas sit amet orci massa. Nam efficitur dui sapien, in
+          eleifend lorem volutpat in. Nullam feugiat, risus id faucibus vestibulum, ex tellus lobortis massa, nec
+          pulvinar nunc nibh vel libero. Integer efficitur enim quis sapien posuere sollicitudin. Proin tincidunt magna
+          a malesuada bibendum. Nullam et efficitur eros. </p>
+      </div>
+      <div class="col-md-4">
+        <h2 class="text-center">What is CDDL?</h2>
+        <p class="text-justify">Aliquam consectetur molestie erat eu rutrum. Nullam eget tincidunt enim. Pellentesque
+          vel consectetur lectus. Ut nec odio vel diam convallis sagittis eu ac nunc. Maecenas non commodo arcu, non
+          luctus urna. In hac habitasse platea dictumst. Suspendisse potenti. Nunc vitae commodo urna. Sed semper dolor
+          in urna laoreet bibendum.</p>
+      </div>
+      <div class="col-md-4">
+        <h2 class="text-center">What is CBOR?</h2>
+        <p class="text-justify">Nullam eget tincidunt enim. Pellentesque vel consectetur lectus. Ut nec odio vel diam
+          convallis sagittis eu ac nunc. Maecenas non commodo arcu, non luctus urna. In hac habitasse platea dictumst.
+          Suspendisse potenti. Nunc vitae commodo urna. Sed semper dolor in urna laoreet bibendum. Aliquam consectetur
+          molestie erat eu rutrum.</p>
+      </div>
+    </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+</body>
 </html>
