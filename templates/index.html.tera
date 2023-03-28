@@ -1,8 +1,6 @@
 {% extends "base" %}
 
-{% block title %}
-CDDL Validation
-{% endblock title %}
+{% block title %}CDDL Validation{% endblock title %}
 
 {% block content %}
   <form action="/" method="post">
