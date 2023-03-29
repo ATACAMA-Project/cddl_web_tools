@@ -2,18 +2,6 @@ use cddl::{cddl_from_str, validate_cbor_from_slice, validate_json_from_str};
 use cddl_cat::{parse_cddl as parse_cat, validate_cbor_bytes, validate_json_str, ValidateResult};
 use cuddle::{cddl::Cddl, parse_cddl as parse_cuddle};
 
-pub struct ValidationData {
-    cddl: String,
-    json: Option<String>,
-    cbor: Option<Vec<u8>>,
-}
-
-impl ValidationData {
-    pub fn new(cddl: String, json: Option<String>, cbor: Option<Vec<u8>>) -> Self {
-        Self { cddl, json, cbor }
-    }
-}
-
 pub enum ValidationLibrary {
     Cddl,
     CddlCat,
@@ -21,51 +9,50 @@ pub enum ValidationLibrary {
 }
 
 pub enum ValidationType {
-    Plain,
-    WithJson,
-    WithCbor,
+    Plain(String),
+    WithJson(String, String),
+    WithCbor(String, Vec<u8>),
 }
 
 static FILENAME: &str = "cddl.cddl";
 
-pub fn validate(
-    data: ValidationData,
-    library: ValidationLibrary,
-    validation_type: ValidationType,
-) -> Result<(), String> {
-    let cddl_str = data.cddl.as_ref();
-    let json_str = data.json.as_ref();
-    let cbor_bytes = data.cbor.as_ref();
+pub fn validate(library: ValidationLibrary, validation_type: ValidationType) -> Result<(), String> {
     match library {
         ValidationLibrary::Cddl => match validation_type {
-            ValidationType::Plain => cddl_from_str(cddl_str, true).map(|_| ()),
-            ValidationType::WithJson => {
-                validate_json_from_str(cddl_str, json_str.unwrap(), None).map_err(|e| e.to_string())
+            ValidationType::Plain(cddl_str) => cddl_from_str(&cddl_str, true).map(|_| ()),
+            ValidationType::WithJson(cddl_str, json_str) => {
+                validate_json_from_str(&cddl_str, &json_str, None).map_err(|e| e.to_string())
             }
-            ValidationType::WithCbor => {
-                validate_cbor_from_slice(cddl_str, cbor_bytes.unwrap(), None)
-                    .map_err(|e| e.to_string())
+            ValidationType::WithCbor(cddl_str, cbor_bytes) => {
+                validate_cbor_from_slice(&cddl_str, &cbor_bytes, None).map_err(|e| e.to_string())
             }
         },
         ValidationLibrary::CddlCat => match validation_type {
-            ValidationType::Plain => parse_cat(cddl_str).map(|_| ()).map_err(|e| e.to_string()),
-            ValidationType::WithJson => cddl_cat_validate_against_data(cddl_str, |name| {
-                validate_json_str(name, cddl_str, json_str.unwrap())
-            }),
-            ValidationType::WithCbor => cddl_cat_validate_against_data(cddl_str, |name| {
-                validate_cbor_bytes(name, cddl_str, cbor_bytes.unwrap())
-            }),
+            ValidationType::Plain(cddl_str) => {
+                parse_cat(&cddl_str).map(|_| ()).map_err(|e| e.to_string())
+            }
+            ValidationType::WithJson(cddl_str, json_str) => {
+                cddl_cat_validate_against_data(&cddl_str, |name| {
+                    validate_json_str(name, &cddl_str, &json_str)
+                })
+            }
+            ValidationType::WithCbor(cddl_str, cbor_bytes) => {
+                cddl_cat_validate_against_data(&cddl_str, |name| {
+                    validate_cbor_bytes(name, &cddl_str, &cbor_bytes)
+                })
+            }
         },
         ValidationLibrary::Cuddle => match validation_type {
-            ValidationType::Plain => parse_cuddle(cddl_str, FILENAME)
+            ValidationType::Plain(cddl_str) => parse_cuddle(&cddl_str, FILENAME)
                 .map(|_| ())
                 .map_err(|e| e.to_string()),
-            ValidationType::WithJson => Err("Cuddle does not support JSON validation".to_string()),
-            ValidationType::WithCbor => {
-                let cddl_root = parse_cuddle(cddl_str, FILENAME).map_err(|e| e.to_string())?;
+            ValidationType::WithJson(..) => {
+                Err("Cuddle does not support JSON validation".to_string())
+            }
+            ValidationType::WithCbor(cddl_str, cbor_bytes) => {
+                let cddl_root = parse_cuddle(&cddl_str, FILENAME).map_err(|e| e.to_string())?;
                 let cddl = Cddl::from_cddl_root(&cddl_root).map_err(|e| e.to_string())?;
-                cddl.validate_cbor(cbor_bytes.unwrap())
-                    .map_err(|e| e.to_string())
+                cddl.validate_cbor(cbor_bytes).map_err(|e| e.to_string())
             }
         },
     }
@@ -94,9 +81,8 @@ mod tests {
     #[test]
     fn cddl_plain() {
         validate(
-            ValidationData::new(CDDL.to_string(), None, None),
             ValidationLibrary::Cddl,
-            ValidationType::Plain,
+            ValidationType::Plain(CDDL.to_string()),
         )
         .unwrap();
     }
@@ -104,9 +90,8 @@ mod tests {
     #[test]
     fn cat_plain() {
         validate(
-            ValidationData::new(CDDL.to_string(), None, None),
             ValidationLibrary::CddlCat,
-            ValidationType::Plain,
+            ValidationType::Plain(CDDL.to_string()),
         )
         .unwrap();
     }
@@ -114,9 +99,8 @@ mod tests {
     #[test]
     fn cuddle_plain() {
         validate(
-            ValidationData::new(CDDL.to_string(), None, None),
             ValidationLibrary::Cuddle,
-            ValidationType::Plain,
+            ValidationType::Plain(CDDL.to_string()),
         )
         .unwrap();
     }
@@ -124,9 +108,8 @@ mod tests {
     #[test]
     fn cddl_with_json() {
         validate(
-            ValidationData::new(CDDL.to_string(), Some(JSON.to_string()), None),
             ValidationLibrary::Cddl,
-            ValidationType::WithJson,
+            ValidationType::WithJson(CDDL.to_string(), JSON.to_string()),
         )
         .unwrap();
     }
@@ -134,9 +117,8 @@ mod tests {
     #[test]
     fn cddlcat_with_json() {
         validate(
-            ValidationData::new(CDDL.to_string(), Some(JSON.to_string()), None),
             ValidationLibrary::CddlCat,
-            ValidationType::WithJson,
+            ValidationType::WithJson(CDDL.to_string(), JSON.to_string()),
         )
         .unwrap();
     }
@@ -145,9 +127,8 @@ mod tests {
     #[should_panic]
     fn cuddle_with_json() {
         validate(
-            ValidationData::new(CDDL.to_string(), Some(JSON.to_string()), None),
             ValidationLibrary::Cuddle,
-            ValidationType::WithJson,
+            ValidationType::WithJson(CDDL.to_string(), JSON.to_string()),
         )
         .unwrap();
     }
