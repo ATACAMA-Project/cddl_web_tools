@@ -58,11 +58,11 @@ pub fn validate(library: ValidationLibrary, validation_type: ValidationType) -> 
     }
 }
 
-fn cddl_cat_validate_against_data<F>(input: &str, f: F) -> Result<(), String>
+fn cddl_cat_validate_against_data<F>(input: impl AsRef<str>, f: F) -> Result<(), String>
 where
     F: Fn(&str) -> ValidateResult,
 {
-    parse_cat(input)
+    parse_cat(input.as_ref())
         .unwrap()
         .rules
         .iter()
