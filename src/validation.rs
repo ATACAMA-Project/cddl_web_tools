@@ -63,11 +63,14 @@ where
     F: Fn(&str) -> ValidateResult,
 {
     parse_cat(input.as_ref())
-        .unwrap()
-        .rules
-        .iter()
-        .find(|r| f(&r.name).is_ok())
-        .ok_or_else(|| "No matching rule found".to_string())
+        .map(|cddl| {
+            cddl.rules
+                .into_iter()
+                .find(|r| f(&r.name).is_ok())
+                .ok_or_else(|| "No matching rule found".to_string())
+        })
+        .map_err(|e| e.to_string())
+        .and_then(|r| r)
         .map(|_| ())
 }
 
