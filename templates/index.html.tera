@@ -4,18 +4,23 @@
 
 {% block content %}
   <form action="/" method="post">
-    <div class='row'>
-      <div class='col-lg-6'>
-        <div class="form-group">
-          <label for="cddlInput" class="form-label">CDDL</label>
-          <textarea class="form-control" id="cddlInput" name="cddl" rows="3"></textarea>
+    <div class='col'>
+      <div class='row'>
+        <div class='col-lg' id="cddl_col">
+          <div class='form-floating'>
+            <textarea class="form-control" id="cddlText" name="cddl" style="height: 250px"></textarea>
+            <label for="cddlText">CDDL</label>
+          </div>
+        </div>
+        <div class='col-lg' id="json_col" style="display: none;">
+          <div class="form-floating">
+            <textarea class="form-control" id="extraText" name="extra" style="height: 250px"></textarea>
+            <label for="extraText">JSON</label>
+          </div>
         </div>
       </div>
-      <div class='col-lg-6'>
-        <div class="form-group">
-          <label for="extra" class="form-label">extra</label>
-          <textarea class="form-control" id="extra" name="extra" rows="3"></textarea>
-        </div>
+      <div class='col-lg' id="cbor_col" style="display: none;">
+        <input class="form-control" type="file" id="formFile">
       </div>
     </div>
     <div class='row' style='margin-top: 1rem;'>
