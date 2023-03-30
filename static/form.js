@@ -1,5 +1,5 @@
-const json = document.getElementById("json_col");
-const cbor = document.getElementById("cbor_col");
+const json = document.getElementById("json");
+const cbor = document.getElementById("cbor");
 
 function change(type) {
     json.style = type === "json" ? "display: block;" : "display: none;";
