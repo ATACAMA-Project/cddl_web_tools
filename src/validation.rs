@@ -1,36 +1,59 @@
 use cddl::{cddl_from_str, validate_cbor_from_slice, validate_json_from_str};
-use cddl_cat::{parse_cddl as parse_cat, validate_cbor_bytes, validate_json_str, ValidateResult};
+use cddl_cat::{
+    parse_cddl as parse_cat, validate_cbor_bytes, validate_json_str, ValidateError, ValidateResult,
+};
+use cuddle::error::Error as CuddleError;
 use cuddle::{cddl::Cddl, parse_cddl as parse_cuddle};
 
+#[non_exhaustive]
 pub enum ValidationLibrary {
     Cddl,
     CddlCat,
     Cuddle,
 }
 
+#[non_exhaustive]
 pub enum ValidationType {
     Plain(String),
     WithJson(String, String),
     WithCbor(String, Vec<u8>),
 }
 
+#[non_exhaustive]
+#[derive(Debug)]
+pub enum CddlError<'a> {
+    String(String),
+    CddlJsonError(cddl::validator::json::Error),
+    CddlCborError(cddl::validator::cbor::Error<std::io::Error>),
+    CddlCatParseError(cddl_cat::parser::ParseError),
+    CddlCatValidateError(ValidateError),
+    CuddleError(cuddle::error::Error<'a>),
+}
+
 static FILENAME: &str = "cddl.cddl";
 
-pub fn validate(library: ValidationLibrary, validation_type: ValidationType) -> Result<(), String> {
+pub fn validate<'a>(
+    library: ValidationLibrary,
+    validation_type: ValidationType,
+) -> Result<(), CddlError<'a>> {
     match library {
         ValidationLibrary::Cddl => match validation_type {
-            ValidationType::Plain(cddl_str) => cddl_from_str(&cddl_str, true).map(|_| ()),
+            ValidationType::Plain(cddl_str) => cddl_from_str(&cddl_str, true)
+                .map(|_| ())
+                .map_err(|e| CddlError::String(e)),
             ValidationType::WithJson(cddl_str, json_str) => {
-                validate_json_from_str(&cddl_str, &json_str, None).map_err(|e| e.to_string())
+                validate_json_from_str(&cddl_str, &json_str, None)
+                    .map_err(|e| CddlError::CddlJsonError(e))
             }
             ValidationType::WithCbor(cddl_str, cbor_bytes) => {
-                validate_cbor_from_slice(&cddl_str, &cbor_bytes, None).map_err(|e| e.to_string())
+                validate_cbor_from_slice(&cddl_str, &cbor_bytes, None)
+                    .map_err(|e| CddlError::CddlCborError(e))
             }
         },
         ValidationLibrary::CddlCat => match validation_type {
-            ValidationType::Plain(cddl_str) => {
-                parse_cat(&cddl_str).map(|_| ()).map_err(|e| e.to_string())
-            }
+            ValidationType::Plain(cddl_str) => parse_cat(&cddl_str)
+                .map(|_| ())
+                .map_err(|e| CddlError::CddlCatParseError(e)),
             ValidationType::WithJson(cddl_str, json_str) => {
                 cddl_cat_validate_against_data(&cddl_str, |name| {
                     validate_json_str(name, &cddl_str, &json_str)
@@ -43,35 +66,37 @@ pub fn validate(library: ValidationLibrary, validation_type: ValidationType) -> 
             }
         },
         ValidationLibrary::Cuddle => match validation_type {
-            ValidationType::Plain(cddl_str) => parse_cuddle(&cddl_str, FILENAME)
+            ValidationType::Plain(cddl_str) => parse_cuddle(&cddl_str.clone(), FILENAME)
                 .map(|_| ())
-                .map_err(|e| e.to_string()),
-            ValidationType::WithJson(..) => {
-                Err("Cuddle does not support JSON validation".to_string())
-            }
+                .map_err(|e| CddlError::String(e.to_string())),
+            ValidationType::WithJson(..) => Err(CddlError::CuddleError(CuddleError::RuleNotFound(
+                "Cuddle does not support JSON validation",
+            ))),
             ValidationType::WithCbor(cddl_str, cbor_bytes) => {
-                let cddl_root = parse_cuddle(&cddl_str, FILENAME).map_err(|e| e.to_string())?;
-                let cddl = Cddl::from_cddl_root(&cddl_root).map_err(|e| e.to_string())?;
-                cddl.validate_cbor(cbor_bytes).map_err(|e| e.to_string())
+                let cddl_root = parse_cuddle(&cddl_str, FILENAME)
+                    .map_err(|e| CddlError::String(e.to_string()))?;
+                let cddl = Cddl::from_cddl_root(&cddl_root)
+                    .map_err(|e| CddlError::String(e.to_string()))?;
+                cddl.validate_cbor(cbor_bytes)
+                    .map_err(|e| CddlError::String(e.to_string()))
             }
         },
     }
 }
 
-fn cddl_cat_validate_against_data<F>(input: impl AsRef<str>, f: F) -> Result<(), String>
+fn cddl_cat_validate_against_data<'a, F>(input: impl AsRef<str>, f: F) -> Result<(), CddlError<'a>>
 where
     F: Fn(&str) -> ValidateResult,
 {
-    parse_cat(input.as_ref())
-        .map(|cddl| {
-            cddl.rules
-                .into_iter()
-                .find(|r| f(&r.name).is_ok())
-                .ok_or_else(|| "No matching rule found".to_string())
-        })
-        .map_err(|e| e.to_string())
-        .and_then(|r| r)
-        .map(|_| ())
+    let cddl = parse_cat(input.as_ref()).map_err(|e| CddlError::CddlCatParseError(e))?;
+
+    if cddl.rules.iter().any(|r| f(&r.name).is_ok()) {
+        Ok(())
+    } else {
+        Err(CddlError::CddlCatValidateError(ValidateError::MissingRule(
+            "No matching rule found".to_string(),
+        )))
+    }
 }
 
 #[cfg(test)]
