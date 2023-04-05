@@ -23,15 +23,15 @@
     </ul>
 
     <form action="/" method="post">
-      <div class='col'>
-        <div class='row'>
-          <div class='col-lg'>
-            <div class='form-floating'>
+      <div class="col">
+        <div class="row">
+          <div class="col-lg">
+            <div class="form-floating">
               <textarea class="form-control" id="cddlText" name="cddl" style="height: 250px"></textarea>
               <label for="cddlText">CDDL</label>
             </div>
           </div>
-          <div class='col-lg' id="json" style="display: none;">
+          <div class="col-lg" id="json" style="display: none;">
             <div class="form-floating">
               <textarea class="form-control" id="extraText" name="extra" style="height: 250px"></textarea>
               <label for="extraText">JSON</label>
@@ -41,11 +41,9 @@
         <div id="cbor" style="display: none;">
           <input class="form-control" type="file" id="formFile">
         </div>
-        <div class="row align-items-center">
-          <div class="col">
-            <button type="submit" class="btn btn-primary">Submit</button>
+        <div class="row justify-content-center">
+            <button type="submit" class="btn btn-primary" style="max-width: 25rem;">Submit</button>
           </div>
-        </div>
       </div>
     </form>
 
