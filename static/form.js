@@ -1,7 +1,13 @@
-const json = document.getElementById("json");
-const cbor = document.getElementById("cbor");
+const typeField = document.getElementById("type");
 
 function change(type) {
-    json.style = type === "json" ? "display: block;" : "display: none;";
-    cbor.style = type === "cbor" ? "display: block;" : "display: none;";
+    typeField.value = type;
+
+    document.querySelectorAll(".form-extras").forEach(element => {
+      if (element.id !== type) {
+        element.style.display = "none";
+      }
+    });
+
+    document.getElementById(type).style.display = "block";
 }
