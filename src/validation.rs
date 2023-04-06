@@ -40,20 +40,19 @@ pub fn validate<'a>(
         ValidationLibrary::Cddl => match validation_type {
             ValidationType::Plain(cddl_str) => cddl_from_str(&cddl_str, true)
                 .map(|_| ())
-                .map_err(|e| CddlError::String(e)),
+                .map_err(CddlError::String),
             ValidationType::WithJson(cddl_str, json_str) => {
-                validate_json_from_str(&cddl_str, &json_str, None)
-                    .map_err(|e| CddlError::CddlJsonError(e))
+                validate_json_from_str(&cddl_str, &json_str, None).map_err(CddlError::CddlJsonError)
             }
             ValidationType::WithCbor(cddl_str, cbor_bytes) => {
                 validate_cbor_from_slice(&cddl_str, &cbor_bytes, None)
-                    .map_err(|e| CddlError::CddlCborError(e))
+                    .map_err(CddlError::CddlCborError)
             }
         },
         ValidationLibrary::CddlCat => match validation_type {
             ValidationType::Plain(cddl_str) => parse_cat(&cddl_str)
                 .map(|_| ())
-                .map_err(|e| CddlError::CddlCatParseError(e)),
+                .map_err(CddlError::CddlCatParseError),
             ValidationType::WithJson(cddl_str, json_str) => {
                 cddl_cat_validate_against_data(&cddl_str, |name| {
                     validate_json_str(name, &cddl_str, &json_str)
@@ -66,7 +65,7 @@ pub fn validate<'a>(
             }
         },
         ValidationLibrary::Cuddle => match validation_type {
-            ValidationType::Plain(cddl_str) => parse_cuddle(&cddl_str.clone(), FILENAME)
+            ValidationType::Plain(cddl_str) => parse_cuddle(&cddl_str, FILENAME)
                 .map(|_| ())
                 .map_err(|e| CddlError::String(e.to_string())),
             ValidationType::WithJson(..) => Err(CddlError::CuddleError(CuddleError::RuleNotFound(
@@ -88,7 +87,7 @@ fn cddl_cat_validate_against_data<'a, F>(input: impl AsRef<str>, f: F) -> Result
 where
     F: Fn(&str) -> ValidateResult,
 {
-    let cddl = parse_cat(input.as_ref()).map_err(|e| CddlError::CddlCatParseError(e))?;
+    let cddl = parse_cat(input.as_ref()).map_err(CddlError::CddlCatParseError)?;
 
     if cddl.rules.iter().any(|r| f(&r.name).is_ok()) {
         Ok(())
