@@ -1,13 +1,15 @@
+const json = document.getElementById("json");
+const cbor = document.getElementById("cbor");
+const cuddleRadio = document.getElementById("cuddleRadio");
+const cddlRadio = document.getElementById("cddlRadio");
 const typeField = document.getElementById("type");
 
 function change(type) {
     typeField.value = type;
-
-    document.querySelectorAll(".form-extras").forEach(element => {
-      if (element.id !== type) {
-        element.style.display = "none";
-      }
-    });
-
-    document.getElementById(type).style.display = "block";
+    json.style.display = type === "json" ? "block" : "none";
+    cbor.style.display = type === "cbor" ? "block" : "none";
+    cuddleRadio.disabled = type === "json";
+    if (type === "json" && cuddleRadio.checked) {
+        cddlRadio.checked = true;
+    }
 }
