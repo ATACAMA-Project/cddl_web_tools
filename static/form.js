@@ -41,7 +41,7 @@ form.addEventListener("submit", (e) => {
             readyText.style.display = "block";
         })
         .catch(error => {
-            results.innerHTML = "<div className=\"alert alert-warning\" role=\"alert\">" + error.message + "</div>";
+            results.innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">" + error.message + "</div>";
             submitBtn.disabled = false;
             loadingText.style.display = "none";
             readyText.style.display = "block";

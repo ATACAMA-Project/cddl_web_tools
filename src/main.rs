@@ -79,7 +79,7 @@ fn validate(validation_data: Form<Validation<'_>>) -> Template {
     Template::render(
         "response",
         context! {
-            mtype: "danger",
+            mtype: "warning",
             details: result.err().unwrap(),
         },
     )
