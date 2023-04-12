@@ -10,12 +10,11 @@ use rocket::{Build, Rocket};
 use rocket::form::Form;
 use rocket_dyn_templates::{context, Template};
 use rocket::fs::{FileServer, relative};
+use crate::validation::{ValidationLibrary, ValidationType};
 
 #[get("/")]
 fn index() -> Template {
-    Template::render("index", context! {
-        cddl: "",
-    })
+    Template::render("index", context! {})
 }
 
 #[derive(Debug, FromForm)]
@@ -24,17 +23,23 @@ struct Validation<'r> {
 }
 
 #[post("/validate", data = "<validation_data>")]
-fn validate(validation_data: Option<Form<Validation<'_>>>) -> Template {
-    match validation_data {
-        None => Template::render("response", context! {
-                cddl: "",
-            }),
-        Some(data) => {
-            Template::render("response", context! {
-                cddl: data.cddl,
-            })
-        }
+fn validate(validation_data: Form<Validation<'_>>) -> Template {
+    let result = validation::validate(
+        ValidationLibrary::Cddl,
+        ValidationType::Plain(validation_data.cddl.to_string()),
+    );
+
+    if result.is_ok() {
+        return Template::render("response", context! {
+            mtype: "success",
+            details: "The CDDL is valid!",
+        })
     }
+
+    Template::render("response", context! {
+        mtype: "danger",
+        details: result.err().unwrap(),
+    })
 }
 
 #[launch]
