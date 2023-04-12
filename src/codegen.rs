@@ -1,4 +1,4 @@
-use cddl_codegen::cli::{Cli, CLI_ARGS};
+use cddl_codegen::cli::Cli;
 use cddl_codegen::generation::GenerationScope;
 use cddl_codegen::intermediate::{CDDLIdent, IntermediateTypes, RustIdent};
 use cddl_codegen::parsing::{parse_rule, rule_ident, rule_is_scope_marker};
@@ -7,31 +7,15 @@ use std::ffi::OsString;
 use std::fs::File;
 use std::io::{Read, Seek, Write};
 use std::path::Path;
-use std::sync::Mutex;
 use walkdir::{DirEntry, WalkDir};
 use zip::result::{ZipError, ZipResult};
 use zip::write::FileOptions;
 
 pub const GEN_ZIP_FILE: &str = "gen.zip";
 
-pub fn generate_code(root: &Path, cddl_str: &str, args: Option<Cli>) -> Result<OsString, ZipError> {
+pub fn generate_code(root: &Path, cddl_str: &str, args: &mut Cli) -> Result<OsString, ZipError> {
     let gen_path = root.join("gen");
-    let mut global_args = CLI_ARGS.lock().unwrap();
-    if args.is_some() {
-        let my_args = args.unwrap();
-        global_args.lib_name = my_args.lib_name;
-        global_args.annotate_fields = my_args.annotate_fields;
-        global_args.to_from_bytes_methods = my_args.to_from_bytes_methods;
-        global_args.binary_wrappers = my_args.binary_wrappers;
-        global_args.preserve_encodings = my_args.preserve_encodings;
-        global_args.canonical_form = my_args.canonical_form;
-        global_args.wasm = my_args.wasm;
-        global_args.json_serde_derives = my_args.json_serde_derives;
-        global_args.json_schema_export = my_args.json_schema_export;
-        global_args.package_json = my_args.package_json;
-    }
-    global_args.output = gen_path.clone();
-    Mutex::unlock(global_args);
+    args.output = gen_path.clone();
 
     let mut input_files_content = format!(
         "\n{}{} = \"{}\"\n{}\n",
@@ -88,15 +72,15 @@ pub fn generate_code(root: &Path, cddl_str: &str, args: Option<Cli>) -> Result<O
     // Creating intermediate form from the CDDL
     for cddl_rule in dep_graph::topological_rule_order(&cddl_rules) {
         println!("\n\n------------------------------------------\n- Handling rule: {}:{}\n------------------------------------", scope, cddl_rule.name());
-        parse_rule(&mut types, &pv, cddl_rule);
+        parse_rule(&mut types, &pv, cddl_rule, args);
     }
-    types.finalize(&pv);
+    types.finalize(&pv, args);
 
     // Generating code from intermediate form
     println!("\n-----------------------------------------\n- Generating code...\n------------------------------------");
     let mut gen_scope = GenerationScope::new();
-    gen_scope.generate(&types);
-    gen_scope.export(&types).unwrap();
+    gen_scope.generate(&types, args);
+    gen_scope.export(&types, args).unwrap();
     types.print_info();
 
     gen_scope.print_structs_without_deserialize();

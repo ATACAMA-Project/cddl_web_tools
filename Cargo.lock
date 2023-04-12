@@ -337,7 +337,7 @@ dependencies = [
 [[package]]
 name = "cddl-codegen"
 version = "0.1.0"
-source = "git+https://github.com/connectety/cddl-codegen?branch=lib#bf00545ac18d545c3ccab04d467f123f38b91289"
+source = "git+https://github.com/connectety/cddl-codegen?branch=lib#14b74bf97d81b26d1c7e2337cde136a9672382c9"
 dependencies = [
  "cbor_event",
  "cddl",

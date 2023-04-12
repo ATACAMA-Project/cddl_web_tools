@@ -20,7 +20,8 @@ fn index() -> &'static str {
 #[post("/generate", data = "<cddl>")]
 async fn generate(cddl: String) -> Option<NamedFile> {
     let root = tempdir().unwrap();
-    generate_code(root.path(), &cddl, None).unwrap();
+    let mut args = Cli::default();
+    generate_code(root.path(), &cddl, &mut args).unwrap();
     NamedFile::open(root.path().join(GEN_ZIP_FILE).as_path())
         .await
         .ok()
