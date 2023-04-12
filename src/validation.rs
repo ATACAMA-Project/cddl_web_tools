@@ -3,6 +3,7 @@ use cddl_cat::{parse_cddl as parse_cat, validate_cbor_bytes, validate_json_str, 
 use cuddle::{cddl::Cddl, parse_cddl as parse_cuddle};
 
 #[non_exhaustive]
+#[derive(FromFormField, Clone)]
 pub enum ValidationLibrary {
     Cddl,
     CddlCat,

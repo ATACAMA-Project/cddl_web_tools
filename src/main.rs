@@ -17,15 +17,16 @@ fn index() -> Template {
     Template::render("index", context! {})
 }
 
-#[derive(Debug, FromForm)]
+#[derive(FromForm)]
 struct Validation<'r> {
     cddl: &'r str,
+    crateT: ValidationLibrary,
 }
 
 #[post("/validate", data = "<validation_data>")]
 fn validate(validation_data: Form<Validation<'_>>) -> Template {
     let result = validation::validate(
-        ValidationLibrary::Cddl,
+        validation_data.crateT.clone(),
         ValidationType::Plain(validation_data.cddl.to_string()),
     );
 
