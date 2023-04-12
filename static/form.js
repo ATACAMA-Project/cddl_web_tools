@@ -9,11 +9,9 @@ function change(type) {
     json.style.display = type === "json" ? "block" : "none";
     cbor.style.display = type === "cbor" ? "block" : "none";
 
-    if (type === "json") {
-        cuddleRadio.disabled = true;
-        if (cddlRadio.checked) {
-            cuddleRadio.checked = true;
-        }
+    cuddleRadio.disabled = type === "json";
+    if (type === "json" && cuddleRadio.checked) {
+        cddlRadio.checked = true;
     }
 }
 
