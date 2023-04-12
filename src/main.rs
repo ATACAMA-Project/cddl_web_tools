@@ -21,12 +21,14 @@ struct Validation<'r> {
     cddl: &'r str,
 }
 
-#[post("/", data = "<validation_data>")]
+#[post("/validate", data = "<validation_data>")]
 fn validate(validation_data: Option<Form<Validation<'_>>>) -> Template {
     match validation_data {
-        None => index(),
+        None => Template::render("response", context! {
+                cddl: "",
+            }),
         Some(data) => {
-            Template::render("index", context! {
+            Template::render("response", context! {
                 cddl: data.cddl,
             })
         }
