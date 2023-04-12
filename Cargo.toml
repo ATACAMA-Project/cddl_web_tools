@@ -7,7 +7,7 @@ edition = "2021"
 rocket = "0.5.0-rc.2"
 cddl = "0.9.1"
 cddl-cat = "0.6.1"
-cuddle = "0.1.0"
+cuddle = { git = "https://github.com/hansl/cuddle/" }
 
 [dependencies.rocket_dyn_templates]
 version = "0.1.0-rc.2"
