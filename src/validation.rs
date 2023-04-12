@@ -22,8 +22,7 @@ pub fn validate(library: ValidationLibrary, validation_type: ValidationType) -> 
     match library {
         ValidationLibrary::Cddl => match validation_type {
             ValidationType::Plain(cddl_str) => cddl_from_str(&cddl_str, true)
-                .map(|_| ())
-                .map_err(|e| e.to_string()),
+                .map(|_| ()),
             ValidationType::WithJson(cddl_str, json_str) => {
                 validate_json_from_str(&cddl_str, &json_str, None).map_err(|e| e.to_string())
             }
