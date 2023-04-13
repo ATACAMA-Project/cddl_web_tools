@@ -1,5 +1,3 @@
-#![feature(mutex_unlock)]
-
 pub mod codegen;
 
 #[macro_use]
