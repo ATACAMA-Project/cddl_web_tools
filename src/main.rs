@@ -8,10 +8,12 @@ extern crate rocket_dyn_templates;
 use crate::validation::{ValidationLibrary, ValidationType};
 use rocket::form::Form;
 use rocket::fs::{relative, FileServer, TempFile};
-use rocket::Request;
+use rocket::{Request, Response};
 use rocket::{Build, Rocket};
 use rocket_dyn_templates::{context, Template};
 use std::io::Read;
+use rocket::fairing::{Fairing, Info, Kind};
+use rocket::http::Header;
 
 #[get("/")]
 fn index() -> Template {
@@ -91,6 +93,7 @@ fn rocket() -> Rocket<Build> {
         .mount("/", routes![index, validate])
         .mount("/static", FileServer::from(relative!("static")))
         .attach(Template::fairing())
+        .attach(CORS)
         .register("/", catchers![not_found])
 }
 
@@ -103,4 +106,23 @@ fn not_found(req: &Request) -> Template {
             details: format!("The following page was not found {}", req.uri()),
         },
     )
+}
+
+pub struct CORS;
+
+#[rocket::async_trait]
+impl Fairing for CORS {
+    fn info(&self) -> Info {
+        Info {
+            name: "Add CORS headers to responses",
+            kind: Kind::Response,
+        }
+    }
+
+    async fn on_response<'r>(&self, _request: &'r Request<'_>, response: &mut Response<'r>) {
+        response.set_header(Header::new("Access-Control-Allow-Origin", "*"));
+        response.set_header(Header::new("Access-Control-Allow-Methods", "POST"));
+        response.set_header(Header::new("Access-Control-Allow-Headers", "*"));
+        response.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
+    }
 }
