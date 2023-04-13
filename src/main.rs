@@ -1,4 +1,5 @@
 pub mod codegen;
+pub mod validation;
 
 #[macro_use]
 extern crate rocket;

@@ -196,12 +196,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "base64ct"
-version = "1.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8c3c1a368f70d6cf7302d78f8f7093da241fb8e8807c05cc9e51a125895a6d5b"
-
-[[package]]
 name = "binascii"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -636,8 +630,16 @@ dependencies = [
 [[package]]
 name = "cuddle"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "611fee2a28a4e3297bcdf49ef2299f3aec56279ba9ddbad65c10b8d7a034b4f6"
+source = "git+https://github.com/hansl/cuddle/#3d72afab98a3709a7ae1bb3f66717cf8902ce328"
+dependencies = [
+ "base64 0.21.0",
+ "ciborium",
+ "either",
+ "lazy_static",
+ "nom",
+ "nom_locate",
+ "thiserror",
+]
 
 [[package]]
 name = "cxx"
@@ -1389,6 +1391,17 @@ checksum = "d273983c5a657a70a3e8f2a01329822f3b8c8172b73826411a55751e404a0a4a"
 dependencies = [
  "memchr",
  "minimal-lexical",
+]
+
+[[package]]
+name = "nom_locate"
+version = "4.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1e299bf5ea7b212e811e71174c5d1a5d065c4c0ad0c8691ecb1f97e3e66025e"
+dependencies = [
+ "bytecount",
+ "memchr",
+ "nom",
 ]
 
 [[package]]
