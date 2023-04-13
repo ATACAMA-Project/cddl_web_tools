@@ -22,8 +22,7 @@ pub fn validate(library: ValidationLibrary, validation_type: ValidationType) -> 
     match library {
         ValidationLibrary::Cddl => match validation_type {
             ValidationType::Plain(cddl_str) => cddl_from_str(&cddl_str, true)
-                .map(|_| ())
-                .map_err(|e| e.to_string()),
+                .map(|_| ()),
             ValidationType::WithJson(cddl_str, json_str) => {
                 validate_json_from_str(&cddl_str, &json_str, None).map_err(|e| e.to_string())
             }
@@ -53,10 +52,8 @@ pub fn validate(library: ValidationLibrary, validation_type: ValidationType) -> 
             ValidationType::WithJson(..) => {
                 Err("Cuddle does not support JSON validation".to_string())
             }
-            ValidationType::WithCbor(cddl_str, cbor_bytes) => {
-                let cddl_root = parse_cuddle(&cddl_str, FILENAME).map_err(|e| e.to_string())?;
-                let cddl = Cddl::from_cddl_root(&cddl_root).map_err(|e| e.to_string())?;
-                cddl.validate_cbor(cbor_bytes).map_err(|e| e.to_string())
+            ValidationType::WithCbor(..) => {
+                Err("Cuddle does not support CBOR validation".to_string())
             }
         },
     }
