@@ -31,7 +31,7 @@
       <input id="type" name="vtype" hidden/>
 
       <div class="text-center mb-2">
-        <label class="form-label me-3">Rust crate: </label>
+        <label class="form-label me-3">Validation Library: </label>
         <div class="form-check form-check-inline">
           <input class="form-check-input" type="radio" name="crateT" id="cddlRadio" value="cddl" checked>
           <label class="form-check-label" for="cddlRadio">
@@ -87,8 +87,8 @@
         <p class="text-justify">
           This site aims to help you validate CDDL, via one of 3 rust crates
           <a href="https://crates.io/crates/cddl">cddl</a>, <a href="https://crates.io/crates/cddl-cat">cddl-cat</a> or
-          <a href="https://crates.io/crates/cuddle">cuddle</a>.
-          You can also choose to validate your CDDL alone, with a JSON (unless you choose cddl-cat) or a CBOR file.
+          <a href="https://crates.io/crates/cuddle">cuddle</a> (can only validate CDDL alone).
+          You can also choose to validate your CDDL alone, with a JSON or a CBOR file.
           This site is open source and can be found on <a href="file:///etc/passwd">GitHub</a>.
         </p>
       </div>
