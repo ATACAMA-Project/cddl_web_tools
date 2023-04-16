@@ -15,7 +15,7 @@ function change(type) {
     }
 }
 
-const form = document.getElementById("form");
+const form = document.querySelector("form");
 const submitBtn = document.getElementById("submitBtn");
 const loadingText = document.getElementById("loadingText");
 const readyText = document.getElementById("readyText");
@@ -23,7 +23,6 @@ const results = document.getElementById("results");
 
 form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const formData = new FormData(form);
 
     submitBtn.disabled = true;
     readyText.style.display = "none";
@@ -31,7 +30,7 @@ form.addEventListener("submit", (e) => {
 
     fetch("/validate", {
         method: "POST",
-        body: formData
+        body: new FormData(form)
     })
         .then(response => response.text())
         .then(data => {

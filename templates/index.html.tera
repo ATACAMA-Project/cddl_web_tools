@@ -27,7 +27,7 @@
       </li>
     </ul>
 
-    <form id="form">
+    <form>
       <input id="type" name="vtype" hidden/>
 
       <div class="text-center mb-2">
