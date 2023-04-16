@@ -36,12 +36,11 @@ form.addEventListener("submit", (e) => {
         .then(response => response.text())
         .then(data => {
             results.innerHTML = data;
-            submitBtn.disabled = false;
-            loadingText.style.display = "none";
-            readyText.style.display = "block";
         })
         .catch(error => {
             results.innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">" + error.message + "</div>";
+        })
+        .finally(() => {
             submitBtn.disabled = false;
             loadingText.style.display = "none";
             readyText.style.display = "block";
