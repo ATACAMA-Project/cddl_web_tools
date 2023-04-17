@@ -15,15 +15,12 @@ function change(type) {
     }
 }
 
-const form = document.querySelector("form");
 const submitBtn = document.getElementById("submitBtn");
 const loadingText = document.getElementById("loadingText");
 const readyText = document.getElementById("readyText");
 const results = document.getElementById("results");
 
-form.addEventListener("submit", (e) => {
-    e.preventDefault();
-
+function submit() {
     submitBtn.disabled = true;
     readyText.style.display = "none";
     loadingText.style.display = "block";
@@ -44,4 +41,19 @@ form.addEventListener("submit", (e) => {
             loadingText.style.display = "none";
             readyText.style.display = "block";
         });
+}
+
+const form = document.querySelector("form");
+form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    submit();
+});
+
+document.querySelectorAll("textarea").forEach(textArea => {
+    textArea.addEventListener("keydown", function (e) {
+        if (e.ctrlKey && e.code === "Enter") {
+            e.preventDefault();
+            submit();
+        }
+    });
 });
