@@ -33,7 +33,13 @@ function submit() {
         method: "POST",
         body: new FormData(form)
     })
-        .then(response => response.text())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("<strong>HTTP " + response.status + ":</strong> " + response.statusText);
+            }
+
+            return response.text();
+        })
         .then(data => {
             results.innerHTML = data;
         })
