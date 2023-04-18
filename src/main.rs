@@ -46,7 +46,7 @@ fn get_temp_file_content(file: &TempFile) -> Vec<u8> {
         TempFile::File { path, len, .. } => {
             let mut file = std::fs::File::open(path).unwrap();
             let mut bytes = Vec::with_capacity(*len as usize);
-            file.read_to_end(&mut bytes);
+            file.read_to_end(&mut bytes).unwrap();
             bytes
         }
     }
