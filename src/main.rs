@@ -23,7 +23,6 @@ fn index() -> Template {
 #[non_exhaustive]
 #[derive(FromFormField, Clone)]
 enum PlainValidationType {
-    #[field(value = "")]
     Plain,
     #[field(value = "json")]
     WithJson,

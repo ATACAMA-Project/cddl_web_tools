@@ -13,8 +13,8 @@ function change(type) {
     cbor.style.display = type === "cbor" ? "block" : "none";
     cborInput.required = type === "cbor";
 
-    cuddleRadio.disabled = type !== "";
-    if (type !== "" && cuddleRadio.checked) {
+    cuddleRadio.disabled = type !== "plain";
+    if (type !== "plain" && cuddleRadio.checked) {
         cddlRadio.checked = true;
     }
 }
