@@ -89,7 +89,7 @@
           <a href="https://crates.io/crates/cddl">cddl</a>, <a href="https://crates.io/crates/cddl-cat">cddl-cat</a> or
           <a href="https://crates.io/crates/cuddle">cuddle</a> (can only validate CDDL alone).
           You can also choose to validate your CDDL alone, with a JSON or a CBOR file.
-          This site is open source and can be found on <a href="file:///etc/passwd">GitHub</a>.
+          <!--This site is open source and can be found on <a href="file:///etc/passwd">GitHub</a>.-->
         </p>
       </div>
       <div class="col-md-4">
