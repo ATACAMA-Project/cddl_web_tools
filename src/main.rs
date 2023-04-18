@@ -40,14 +40,14 @@ struct Validation<'r> {
     file: TempFile<'r>,
 }
 
-fn get_temp_file_content(file: &TempFile) -> Result<Vec<u8>, std::io::Error> {
+fn get_temp_file_content(file: &TempFile) -> Vec<u8> {
     match file {
-        TempFile::Buffered { content } => Ok(content.as_bytes().to_vec()),
+        TempFile::Buffered { content } => content.as_bytes().to_vec(),
         TempFile::File { path, len, .. } => {
-            let mut file = std::fs::File::open(path.as_ref().left().unwrap())?;
+            let mut file = std::fs::File::open(path).unwrap();
             let mut bytes = Vec::with_capacity(*len as usize);
-            file.read_to_end(&mut bytes)?;
-            Ok(bytes)
+            file.read_to_end(&mut bytes);
+            bytes
         }
     }
 }
@@ -62,7 +62,7 @@ fn validate(validation_data: Form<Validation<'_>>) -> Template {
         }
         PlainValidationType::WithCbor => ValidationType::WithCbor(
             form_cddl,
-            get_temp_file_content(&validation_data.file).unwrap(),
+            get_temp_file_content(&validation_data.file),
         ),
     };
 
