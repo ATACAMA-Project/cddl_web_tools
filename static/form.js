@@ -23,6 +23,7 @@ const submitBtn = document.getElementById("submitBtn");
 const loadingText = document.getElementById("loadingText");
 const readyText = document.getElementById("readyText");
 const results = document.getElementById("results");
+const form = document.querySelector("form");
 
 function submit() {
     submitBtn.disabled = true;
@@ -53,7 +54,6 @@ function submit() {
         });
 }
 
-const form = document.querySelector("form");
 form.addEventListener("submit", (e) => {
     e.preventDefault();
     submit();
