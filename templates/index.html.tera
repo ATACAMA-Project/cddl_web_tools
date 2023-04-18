@@ -54,7 +54,7 @@
       <div class="row row-gap-3">
         <div class="col-lg">
           <div class="form-floating">
-            <textarea class="form-control" id="cddlText" name="cddl" style="height: 250px"></textarea>
+            <textarea class="form-control" id="cddlText" name="cddl" style="height: 250px" required></textarea>
             <label for="cddlText">CDDL</label>
           </div>
         </div>
