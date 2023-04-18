@@ -61,7 +61,7 @@ form.addEventListener("submit", (e) => {
 
 document.querySelectorAll("textarea").forEach(textArea => {
     textArea.addEventListener("keydown", function (e) {
-        if (e.ctrlKey && e.code === "Enter") {
+        if (e.ctrlKey && e.key === "Enter") {
             e.preventDefault();
             submit();
         }
