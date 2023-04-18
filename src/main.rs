@@ -94,18 +94,6 @@ fn rocket() -> Rocket<Build> {
         .mount("/static", FileServer::from(relative!("static")))
         .attach(Template::fairing())
         .attach(CORS)
-        .register("/", catchers![not_found])
-}
-
-#[catch(404)]
-fn not_found(req: &Request) -> Template {
-    Template::render(
-        "error",
-        context! {
-            title: "404",
-            details: format!("The following page was not found {}", req.uri()),
-        },
-    )
 }
 
 pub struct CORS;
