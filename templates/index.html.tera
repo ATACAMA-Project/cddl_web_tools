@@ -28,24 +28,24 @@
     </ul>
 
     <form>
-      <input id="type" name="vtype" hidden value="plain"/>
+      <input name="withExtra" hidden value="plain"/>
 
       <div class="text-center mb-2">
         <label class="form-label me-3">Validation Library: </label>
         <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="crateT" id="cddlRadio" value="cddl" checked>
+          <input class="form-check-input" type="radio" name="lib" id="cddlRadio" value="cddl" checked>
           <label class="form-check-label" for="cddlRadio">
             cddl
           </label>
         </div>
         <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="crateT" id="cuddleRadio" value="cuddle">
+          <input class="form-check-input" type="radio" name="lib" id="cuddleRadio" value="cuddle">
           <label class="form-check-label" for="cuddleRadio">
             cuddle
           </label>
         </div>
         <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="crateT" id="cddlCatRadio" value="cddlCat">
+          <input class="form-check-input" type="radio" name="lib" id="cddlCatRadio" value="cddlCat">
           <label class="form-check-label" for="cddlCatRadio">
             cddl-cat
           </label>
@@ -60,8 +60,8 @@
         </div>
         <div class="col-lg" id="json" style="display: none;">
           <div class="form-floating">
-            <textarea class="form-control" id="extraText" name="extra" style="height: 250px"></textarea>
-            <label for="extraText">JSON</label>
+            <textarea class="form-control" id="jsonText" name="json" style="height: 250px"></textarea>
+            <label for="jsonText">JSON</label>
           </div>
         </div>
       </div>

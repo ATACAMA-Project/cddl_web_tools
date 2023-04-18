@@ -33,9 +33,10 @@ enum PlainValidationType {
 #[derive(FromForm)]
 struct Validation<'r> {
     cddl: &'r str,
-    crateT: ValidationLibrary,
-    vtype: PlainValidationType,
-    extra: &'r str,
+    lib: ValidationLibrary,
+    #[field(name = "withExtra")]
+    with_extra: PlainValidationType,
+    json: &'r str,
     file: TempFile<'r>,
 }
 
@@ -54,10 +55,10 @@ fn get_temp_file_content(file: &TempFile) -> Vec<u8> {
 #[post("/validate", data = "<validation_data>")]
 fn validate(validation_data: Form<Validation<'_>>) -> Template {
     let form_cddl = validation_data.cddl.to_string();
-    let validation_type = match validation_data.vtype {
+    let validation_type = match validation_data.with_extra {
         PlainValidationType::Plain => ValidationType::Plain(form_cddl),
         PlainValidationType::WithJson => {
-            ValidationType::WithJson(form_cddl, validation_data.extra.to_string())
+            ValidationType::WithJson(form_cddl, validation_data.json.to_string())
         }
         PlainValidationType::WithCbor => ValidationType::WithCbor(
             form_cddl,
@@ -65,7 +66,7 @@ fn validate(validation_data: Form<Validation<'_>>) -> Template {
         ),
     };
 
-    let result = validation::validate(validation_data.crateT.clone(), validation_type);
+    let result = validation::validate(validation_data.lib.clone(), validation_type);
 
     if result.is_ok() {
         return Template::render(

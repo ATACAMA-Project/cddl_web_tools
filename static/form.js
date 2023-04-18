@@ -4,10 +4,10 @@ const cbor = document.getElementById("cbor");
 const cborInput = cbor.querySelector("input");
 const cuddleRadio = document.getElementById("cuddleRadio");
 const cddlRadio = document.getElementById("cddlRadio");
-const typeField = document.getElementById("type");
+const withExtra = document.querySelector("input[name='withExtra']");
 
 function change(type) {
-    typeField.value = type;
+    withExtra.value = type;
     json.style.display = type === "json" ? "block" : "none";
     jsonInput.required = type === "json";
     cbor.style.display = type === "cbor" ? "block" : "none";
