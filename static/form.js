@@ -34,7 +34,7 @@ function submit() {
             results.innerHTML = data;
         })
         .catch(error => {
-            results.innerHTML = "<div class=\"alert alert-danger\" role=\"alert\">" + error.message + "</div>";
+            results.innerHTML = "<pre class=\"alert alert-danger\" role=\"alert\">" + error.message + "</pre>";
         })
         .finally(() => {
             submitBtn.disabled = false;
