@@ -3,10 +3,12 @@ name = "cddl_web_tools"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 rocket = "0.5.0-rc.2"
 cddl = "0.9.1"
 cddl-cat = "0.6.1"
 cuddle = { git = "https://github.com/hansl/cuddle/" }
+
+[dependencies.rocket_dyn_templates]
+version = "0.1.0-rc.2"
+features = ["tera"]

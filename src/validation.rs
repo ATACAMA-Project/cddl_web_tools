@@ -1,8 +1,9 @@
 use cddl::{cddl_from_str, validate_cbor_from_slice, validate_json_from_str};
 use cddl_cat::{parse_cddl as parse_cat, validate_cbor_bytes, validate_json_str, ValidateResult};
-use cuddle::{cddl::Cddl, parse_cddl as parse_cuddle};
+use cuddle::{parse_cddl as parse_cuddle};
 
 #[non_exhaustive]
+#[derive(FromFormField, Clone)]
 pub enum ValidationLibrary {
     Cddl,
     CddlCat,
@@ -21,7 +22,7 @@ static FILENAME: &str = "cddl.cddl";
 pub fn validate(library: ValidationLibrary, validation_type: ValidationType) -> Result<(), String> {
     match library {
         ValidationLibrary::Cddl => match validation_type {
-            ValidationType::Plain(cddl_str) => cddl_from_str(&cddl_str, true)
+            ValidationType::Plain(cddl_str) => cddl_from_str(&cddl_str, false)
                 .map(|_| ()),
             ValidationType::WithJson(cddl_str, json_str) => {
                 validate_json_from_str(&cddl_str, &json_str, None).map_err(|e| e.to_string())

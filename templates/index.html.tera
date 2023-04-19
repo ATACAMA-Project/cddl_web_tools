@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CDDL Validation</title>
+    <link rel="icon" href="/static/favicon.svg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+  </head>
+  <body class="p-3">
+    <ul class="nav nav-tabs justify-content-center mb-3" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" type="button" data-bs-toggle="tab" role="tab" onclick="change('plain')"
+                aria-selected="true">CDDL
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" type="button" data-bs-toggle="tab" role="tab" onclick="change('json')"
+                aria-selected="true">CDDL+JSON
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" type="button" data-bs-toggle="tab" role="tab" onclick="change('cbor')"
+                aria-selected="true">CDDL+CBOR
+        </button>
+      </li>
+    </ul>
+
+    <form>
+      <input name="withExtra" hidden value="plain"/>
+
+      <div class="text-center mb-2">
+        <label class="form-label me-3">Validation Library: </label>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="lib" id="cddlRadio" value="cddl" checked>
+          <label class="form-check-label" for="cddlRadio">
+            cddl
+          </label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="lib" id="cuddleRadio" value="cuddle">
+          <label class="form-check-label" for="cuddleRadio">
+            cuddle
+          </label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="lib" id="cddlCatRadio" value="cddlCat">
+          <label class="form-check-label" for="cddlCatRadio">
+            cddl-cat
+          </label>
+        </div>
+      </div>
+      <div class="row row-gap-3">
+        <div class="col-lg">
+          <div class="form-floating">
+            <textarea class="form-control" id="cddlText" name="cddl" style="height: 250px" required></textarea>
+            <label for="cddlText">CDDL</label>
+          </div>
+        </div>
+        <div class="col-lg" id="json" style="display: none;">
+          <div class="form-floating">
+            <textarea class="form-control" id="jsonText" name="json" style="height: 250px"></textarea>
+            <label for="jsonText">JSON</label>
+          </div>
+        </div>
+      </div>
+      <div id="cbor" class="mt-3" style="display: none;">
+        <input class="form-control" type="file" id="formFile" name="file">
+      </div>
+      <div class="d-flex justify-content-center my-3">
+        <button type="submit" class="flex-fill btn btn-primary" id="submitBtn" style="max-width: 25rem;">
+          <span id="readyText">Submit</span>
+          <span id="loadingText" style="display: none;">
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              Loading...
+            </span>
+        </button>
+      </div>
+    </form>
+
+    <div id="results"></div>
+
+    <div class="row">
+      <div class="col-md-4">
+        <h2 class="text-center">Why this Site?</h2>
+        <p class="text-justify">
+          This site aims to help you validate CDDL, via one of 3 rust crates
+          <a href="https://crates.io/crates/cddl">cddl</a>, <a href="https://crates.io/crates/cddl-cat">cddl-cat</a> or
+          <a href="https://crates.io/crates/cuddle">cuddle</a> (can only validate CDDL alone).
+          You can also choose to validate your CDDL alone, with a JSON or a CBOR file.
+          <!--This site is open source and can be found on <a href="file:///etc/passwd">GitHub</a>.-->
+        </p>
+      </div>
+      <div class="col-md-4">
+        <h2 class="text-center">What is CBOR?</h2>
+        <p class="text-justify">
+          CBOR (Concise Binary Object Representation) is a binary format for encoding data that is designed to
+          be efficient in terms of space and time. Thus, CBOR can be thought of as a binary equivalent to JSON.
+          It is particularly useful for applications that operate on resource-constrained devices, such as IoT devices,
+          where memory and processing power are limited.
+          Additionally, CBOR is well-suited for high-speed data processing and transmission over the network due to its
+          compact size and fast encoding/decoding.
+          To learn more about CBOR, visit the <a href="https://cbor.io/">CBOR website</a> or read the
+          <a href="https://datatracker.ietf.org/doc/html/rfc8949">CBOR specification</a>.
+        </p>
+      </div>
+      <div class="col-md-4">
+        <h2 class="text-center">What is CDDL?</h2>
+        <p class="text-justify">
+          CDDL (Concise Data Definition Language) is a language used to define data structures in a concise and
+          human-readable form.
+          It can be used as a quasi data-scheme for data formats like CBOR or JSON to define the format for use in
+          network protocols and other applications.
+          CDDL is particularly useful for defining data formats in protocols or APIs, as it allows developers to
+          specify the structure and constraints of data in a clear and concise manner.
+          To learn more about CDDL, read the
+          <a href="https://datatracker.ietf.org/doc/html/rfc8610">CDDL specification</a>.
+        </p>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+            crossorigin="anonymous"></script>
+    <script src="/static/form.js"></script>
+  </body>
+</html>
