@@ -1,0 +1,4 @@
+[release]
+port = 443
+address = "0.0.0.0"
+tls = { certs = "/mnt/ssl/fullchain.pem", key = "/mnt/ssl/privkey.pem" }
