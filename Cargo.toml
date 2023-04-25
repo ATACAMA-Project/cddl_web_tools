@@ -3,8 +3,6 @@ name = "cddl_web_tools"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 rocket = "0.5.0-rc.2"
 cddl = "0.9.1"
@@ -14,3 +12,7 @@ cddl-codegen = { git = "https://github.com/connectety/cddl-codegen", branch = "l
 tempfile = "3"
 zip = "0.6.4"
 walkdir = "2.3.3"
+
+[dependencies.rocket_dyn_templates]
+version = "0.1.0-rc.2"
+features = ["tera"]
