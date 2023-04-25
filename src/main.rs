@@ -1,25 +1,24 @@
-mod codegen;
-mod validation;
-
 #[macro_use]
 extern crate rocket;
-
 extern crate rocket_dyn_templates;
 
-use cddl_codegen::cli::Cli;
-use codegen::generate_code;
-use codegen::GEN_ZIP_FILE;
-use rocket::fs::NamedFile;
-use crate::validation::{ValidationLibrary, ValidationType};
-use rocket::form::Form;
-use rocket::fs::{relative, FileServer, TempFile};
-use rocket::{Request, Response};
-use rocket::{Build, Rocket};
-use rocket_dyn_templates::{context, Template};
 use std::io::Read;
+
+use cddl_codegen::cli::Cli;
+use rocket::{Build, Request, Response, Rocket};
 use rocket::fairing::{Fairing, Info, Kind};
+use rocket::form::Form;
+use rocket::fs::{FileServer, NamedFile, relative, TempFile};
 use rocket::http::Header;
+use rocket_dyn_templates::{context, Template};
 use tempfile::tempdir;
+
+use codegen::{GEN_ZIP_FILE, generate_code};
+
+use crate::validation::{ValidationLibrary, ValidationType};
+
+mod codegen;
+mod validation;
 
 #[get("/")]
 fn index() -> Template {
