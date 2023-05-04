@@ -1,23 +1,26 @@
-mod validation;
-
 #[macro_use]
 extern crate rocket;
-
 extern crate rocket_dyn_templates;
 
-use crate::validation::{ValidationLibrary, ValidationType};
-use rocket::form::Form;
-use rocket::fs::{relative, FileServer, TempFile};
+use std::io::Read;
+use std::path::Path;
+
 use rocket::{Request, Response};
 use rocket::{Build, Rocket};
-use rocket_dyn_templates::{context, Template};
-use std::io::Read;
 use rocket::fairing::{Fairing, Info, Kind};
+use rocket::form::Form;
+use rocket::fs::{FileServer, NamedFile, relative, TempFile};
 use rocket::http::Header;
+use rocket_dyn_templates::{context, Template};
+
+use crate::validation::{ValidationLibrary, ValidationType};
+
+mod validation;
 
 #[get("/")]
-fn index() -> Template {
-    Template::render("index", context! {})
+async fn index() -> NamedFile {
+    let file_path = Path::new("static/index.html");
+    NamedFile::open(file_path).await.unwrap()
 }
 
 #[non_exhaustive]
