@@ -1,6 +1,5 @@
 #[macro_use]
 extern crate rocket;
-extern crate rocket_dyn_templates;
 
 use std::io::Read;
 use std::path::Path;
@@ -11,7 +10,6 @@ use rocket::fairing::{Fairing, Info, Kind};
 use rocket::form::Form;
 use rocket::fs::{FileServer, NamedFile, relative, TempFile};
 use rocket::http::Header;
-use rocket_dyn_templates::{context, Template};
 
 use crate::validation::{ValidationLibrary, ValidationType};
 
@@ -56,7 +54,7 @@ fn get_temp_file_content(file: &TempFile) -> Vec<u8> {
 }
 
 #[post("/validate", data = "<validation_data>")]
-fn validate(validation_data: Form<Validation<'_>>) -> Template {
+fn validate(validation_data: Form<Validation<'_>>) -> String {
     let form_cddl = validation_data.cddl.to_string();
     let validation_type = match validation_data.with_extra {
         PlainValidationType::Plain => ValidationType::Plain(form_cddl),
@@ -72,21 +70,16 @@ fn validate(validation_data: Form<Validation<'_>>) -> Template {
     let result = validation::validate(validation_data.lib.clone(), validation_type);
 
     if result.is_ok() {
-        return Template::render(
-            "response",
-            context! {
-                mtype: "success",
-                details: "The CDDL is valid!",
-            },
-        );
+        return render("success", "Validation successful");
     }
 
-    Template::render(
-        "response",
-        context! {
-            mtype: "warning",
-            details: result.err().unwrap(),
-        },
+    render("warning", result.err().unwrap())
+}
+
+#[inline]
+fn render(mtype: &str, details: impl AsRef<str> + std::fmt::Display) -> String {
+    format!(
+        r#"<pre class="alert alert-{mtype}" role="alert">{details}</pre>"#
     )
 }
 
@@ -95,5 +88,4 @@ fn rocket() -> Rocket<Build> {
     rocket::build()
         .mount("/", routes![index, validate])
         .mount("/static", FileServer::from(relative!("static")))
-        .attach(Template::fairing())
 }

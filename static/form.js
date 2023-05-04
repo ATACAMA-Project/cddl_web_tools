@@ -36,7 +36,7 @@ function submit() {
     })
         .then(response => {
             if (!response.ok) {
-                throw new Error("<strong>HTTP " + response.status + ":</strong> " + response.statusText);
+                throw new Error("<strong>HTTP " + response.status + ":</strong><br>" + response.statusText);
             }
 
             return response.text();
