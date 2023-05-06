@@ -7,6 +7,21 @@
     <link rel="icon" href="/static/favicon.svg">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <style>
+        @keyframes desaturate {
+            0% {
+                filter: saturate(230%);
+            }
+            100% {
+                filter: saturate(100%);
+            }
+        }
+
+        .alert {
+            animation-name: desaturate;
+            animation-duration: 500ms;
+        }
+    </style>
   </head>
   <body class="p-3">
     <ul class="nav nav-tabs justify-content-center mb-3" role="tablist">
