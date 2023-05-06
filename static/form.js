@@ -27,6 +27,9 @@ const form = document.querySelector("form");
 
 function submit() {
     function escape(unsafe) {
+        if (typeof unsafe !== "string")
+            return "";
+
         return unsafe
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
@@ -36,13 +39,8 @@ function submit() {
     }
 
     function renderJSON(alertType, title, message) {
-        let titleHTML = "";
-        if (title !== undefined && title !== null && title !== "") {
-            titleHTML = "<h4 class=\"alert-heading\">" + escape(title) + "</h4>";
-        }
-
         return "<pre class=\"alert alert-" + alertType + "\" role=\"alert\">" +
-            titleHTML +
+            "<h4 class=\"alert-heading\">" + escape(title) + "</h4>" +
             "<p>" + escape(message) + "</p>" +
             "</pre>";
     }
