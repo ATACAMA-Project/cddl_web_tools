@@ -26,6 +26,27 @@ const results = document.getElementById("results");
 const form = document.querySelector("form");
 
 function submit() {
+    function escape(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function renderJSON(alertType, title, message) {
+        let titleHTML = "";
+        if (title !== undefined && title !== null && title !== "") {
+            titleHTML = "<h4 class=\"alert-heading\">" + escape(title) + "</h4>";
+        }
+
+        return "<pre class=\"alert alert-" + alertType + "\" role=\"alert\">" +
+            titleHTML +
+            "<p>" + escape(message) + "</p>" +
+            "</pre>";
+    }
+
     submitBtn.disabled = true;
     readyText.style.display = "none";
     loadingText.style.display = "block";
@@ -36,16 +57,16 @@ function submit() {
     })
         .then(response => {
             if (!response.ok) {
-                throw new Error("<strong>HTTP " + response.status + ":</strong><br>" + response.statusText);
+                results.innerHTML = renderJSON("danger", "HTTP: " + response.status, response.statusText);
             }
 
-            return response.text();
+            return response.json();
         })
         .then(data => {
-            results.innerHTML = data;
+            results.innerHTML = renderJSON(data.alertType, data.title, data.message);
         })
-        .catch(error => {
-            results.innerHTML = "<pre class=\"alert alert-danger\" role=\"alert\">" + error.message + "</pre>";
+        .catch(e => {
+            results.innerHTML = renderJSON("danger", "Invalid Response", e.message);
         })
         .finally(() => {
             submitBtn.disabled = false;

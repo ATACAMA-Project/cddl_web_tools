@@ -4,12 +4,10 @@ extern crate rocket;
 use std::io::Read;
 use std::path::Path;
 
-use rocket::{Request, Response};
 use rocket::{Build, Rocket};
-use rocket::fairing::{Fairing, Info, Kind};
 use rocket::form::Form;
 use rocket::fs::{FileServer, NamedFile, relative, TempFile};
-use rocket::http::Header;
+use rocket::serde::{json::Json, Serialize};
 
 use crate::validation::{ValidationLibrary, ValidationType};
 
@@ -53,8 +51,17 @@ fn get_temp_file_content(file: &TempFile) -> Vec<u8> {
     }
 }
 
+#[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
+struct ValidationResponse {
+    #[serde(rename = "alertType")]
+    alert_type: String,
+    title: String,
+    message: Option<String>,
+}
+
 #[post("/validate", data = "<validation_data>")]
-fn validate(validation_data: Form<Validation<'_>>) -> String {
+fn validate(validation_data: Form<Validation<'_>>) -> Json<ValidationResponse> {
     let form_cddl = validation_data.cddl.to_string();
     let validation_type = match validation_data.with_extra {
         PlainValidationType::Plain => ValidationType::Plain(form_cddl),
@@ -70,17 +77,18 @@ fn validate(validation_data: Form<Validation<'_>>) -> String {
     let result = validation::validate(validation_data.lib.clone(), validation_type);
 
     if result.is_ok() {
-        return render("success", "Validation successful");
+        return Json(ValidationResponse {
+            alert_type: "success".to_string(),
+            title: "Validation successful".to_string(),
+            message: None,
+        });
     }
 
-    render("warning", result.err().unwrap())
-}
-
-#[inline]
-fn render(mtype: &str, details: impl AsRef<str> + std::fmt::Display) -> String {
-    format!(
-        r#"<pre class="alert alert-{mtype}" role="alert">{details}</pre>"#
-    )
+    Json(ValidationResponse {
+        alert_type: "warning".to_string(),
+        title: "Validation failed".to_string(),
+        message: Some(result.err().unwrap()),
+    })
 }
 
 #[launch]
