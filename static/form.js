@@ -45,12 +45,11 @@ function submit() {
     loadingText.style.display = "block";
 
     fetch("/validate", {
-        method: "POST",
-        body: new FormData(form)
+        method: "POST", body: new FormData(form)
     })
         .then(response => {
             if (!response.ok) {
-                results.innerHTML = renderJSON("danger", "HTTP: " + response.status, response.statusText);
+                return Promise.reject(response);
             }
 
             return response.json();
@@ -59,7 +58,11 @@ function submit() {
             results.innerHTML = renderJSON(data.alertType, data.title, data.message);
         })
         .catch(e => {
-            results.innerHTML = renderJSON("danger", "Invalid Response", e.message);
+            if (e instanceof Response) {
+                results.innerHTML = renderJSON("danger", "HTTP: " + e.status, e.statusText)
+            } else {
+                results.innerHTML = renderJSON("danger", "Invalid Response: ", e.message);
+            }
         })
         .finally(() => {
             submitBtn.disabled = false;
