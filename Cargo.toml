@@ -12,3 +12,7 @@ cuddle = { git = "https://github.com/hansl/cuddle/" }
 [dependencies.rocket_dyn_templates]
 version = "0.1.0-rc.2"
 features = ["tera"]
+
+[build-dependencies]
+minify-html = "0.11.0"
+minify-js = "0.5.6"
