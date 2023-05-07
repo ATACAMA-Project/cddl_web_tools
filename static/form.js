@@ -26,26 +26,43 @@ const results = document.getElementById("results");
 const form = document.querySelector("form");
 
 function submit() {
+    function escape(unsafe) {
+        if (typeof unsafe !== "string")
+            return "";
+
+        return new Option(unsafe).innerHTML;
+    }
+
+    function renderJSON(alertType, title, message) {
+        return "<pre class=\"alert alert-" + alertType + "\" role=\"alert\">" +
+            "<h4 class=\"alert-heading\">" + escape(title) + "</h4>" +
+            "<p>" + escape(message) + "</p>" +
+            "</pre>";
+    }
+
     submitBtn.disabled = true;
     readyText.style.display = "none";
     loadingText.style.display = "block";
 
     fetch("/validate", {
-        method: "POST",
-        body: new FormData(form)
+        method: "POST", body: new FormData(form)
     })
         .then(response => {
             if (!response.ok) {
-                throw new Error("<strong>HTTP " + response.status + ":</strong> " + response.statusText);
+                return Promise.reject(response);
             }
 
-            return response.text();
+            return response.json();
         })
         .then(data => {
-            results.innerHTML = data;
+            results.innerHTML = renderJSON(data.alertType, data.title, data.message);
         })
-        .catch(error => {
-            results.innerHTML = "<pre class=\"alert alert-danger\" role=\"alert\">" + error.message + "</pre>";
+        .catch(e => {
+            if (e instanceof Response) {
+                results.innerHTML = renderJSON("danger", "HTTP: " + e.status, e.statusText)
+            } else {
+                results.innerHTML = renderJSON("danger", "Invalid Response: ", e.message);
+            }
         })
         .finally(() => {
             submitBtn.disabled = false;
