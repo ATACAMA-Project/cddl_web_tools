@@ -1,23 +1,22 @@
-mod validation;
-
 #[macro_use]
 extern crate rocket;
 
-extern crate rocket_dyn_templates;
+use std::io::Read;
+use std::path::Path;
+
+use rocket::{Build, Rocket};
+use rocket::form::Form;
+use rocket::fs::{FileServer, NamedFile, relative, TempFile};
+use rocket::serde::{json::Json, Serialize};
 
 use crate::validation::{ValidationLibrary, ValidationType};
-use rocket::form::Form;
-use rocket::fs::{relative, FileServer, TempFile};
-use rocket::{Request, Response};
-use rocket::{Build, Rocket};
-use rocket_dyn_templates::{context, Template};
-use std::io::Read;
-use rocket::fairing::{Fairing, Info, Kind};
-use rocket::http::Header;
+
+mod validation;
 
 #[get("/")]
-fn index() -> Template {
-    Template::render("index", context! {})
+async fn index() -> NamedFile {
+    let file_path = Path::new("static/index.html");
+    NamedFile::open(file_path).await.unwrap()
 }
 
 #[non_exhaustive]
@@ -52,8 +51,17 @@ fn get_temp_file_content(file: &TempFile) -> Vec<u8> {
     }
 }
 
+#[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
+struct ValidationResponse {
+    #[serde(rename = "alertType")]
+    alert_type: String,
+    title: String,
+    message: Option<String>,
+}
+
 #[post("/validate", data = "<validation_data>")]
-fn validate(validation_data: Form<Validation<'_>>) -> Template {
+fn validate(validation_data: Form<Validation<'_>>) -> Json<ValidationResponse> {
     let form_cddl = validation_data.cddl.to_string();
     let validation_type = match validation_data.with_extra {
         PlainValidationType::Plain => ValidationType::Plain(form_cddl),
@@ -69,22 +77,18 @@ fn validate(validation_data: Form<Validation<'_>>) -> Template {
     let result = validation::validate(validation_data.lib.clone(), validation_type);
 
     if result.is_ok() {
-        return Template::render(
-            "response",
-            context! {
-                mtype: "success",
-                details: "The CDDL is valid!",
-            },
-        );
+        return Json(ValidationResponse {
+            alert_type: "success".to_string(),
+            title: "Validation successful".to_string(),
+            message: None,
+        });
     }
 
-    Template::render(
-        "response",
-        context! {
-            mtype: "warning",
-            details: result.err().unwrap(),
-        },
-    )
+    Json(ValidationResponse {
+        alert_type: "warning".to_string(),
+        title: "Validation failed".to_string(),
+        message: Some(result.err().unwrap()),
+    })
 }
 
 #[launch]
@@ -92,5 +96,4 @@ fn rocket() -> Rocket<Build> {
     rocket::build()
         .mount("/", routes![index, validate])
         .mount("/static", FileServer::from(relative!("static")))
-        .attach(Template::fairing())
 }

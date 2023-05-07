@@ -1,3 +1,0 @@
-<pre class="alert alert-{{ mtype }}" role="alert">
-  {{ details }}
-</pre>
