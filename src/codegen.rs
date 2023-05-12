@@ -6,7 +6,7 @@ use cddl_codegen::{dep_graph, parsing};
 use std::ffi::OsString;
 use std::fs::File;
 use std::io::{Read, Seek, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
 use zip::result::{ZipError, ZipResult};
 use zip::write::FileOptions;
@@ -14,6 +14,7 @@ use zip::write::FileOptions;
 pub const GEN_ZIP_FILE: &str = "gen.zip";
 
 pub fn generate_code(root: &Path, cddl_str: &str, args: &mut Cli) -> Result<OsString, ZipError> {
+    args.static_dir = PathBuf::from("codegen/static");
     let gen_path = root.join("gen");
     args.output = gen_path.clone();
 

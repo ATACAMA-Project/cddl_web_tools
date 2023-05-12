@@ -96,11 +96,22 @@ fn validate(validation_data: Form<Validation<'_>>) -> Json<ValidationResponse> {
     })
 }
 
+#[derive(FromForm)]
+struct Gen<'r> {
+    data: &'r str,
+}
+
+#[get("/generation")]
+async fn generation() -> NamedFile {
+    let file_path = Path::new("static/generation.html");
+    NamedFile::open(file_path).await.unwrap()
+}
+
 #[post("/generate", data = "<cddl>")]
-async fn generate(cddl: String) -> Option<NamedFile> {
+async fn generate(cddl: Form<Gen<'_>>) -> Option<NamedFile> {
     let root = tempdir().unwrap();
     let mut args = Cli::default();
-    generate_code(root.path(), &cddl, &mut args).unwrap();
+    generate_code(root.path(), &cddl.data, &mut args).unwrap();
     NamedFile::open(root.path().join(GEN_ZIP_FILE).as_path())
         .await
         .ok()
@@ -109,6 +120,6 @@ async fn generate(cddl: String) -> Option<NamedFile> {
 #[launch]
 fn rocket() -> Rocket<Build> {
     rocket::build()
-        .mount("/", routes![index, validate, generate])
+        .mount("/", routes![index, validate, generation, generate])
         .mount("/static", FileServer::from(relative!("static")))
 }
