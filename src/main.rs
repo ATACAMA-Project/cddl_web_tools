@@ -9,7 +9,7 @@ use rocket::form::Form;
 use rocket::fs::{FileServer, NamedFile, relative, TempFile};
 use rocket::serde::{json::Json, Serialize};
 
-use crate::validation::{ValidationLibrary, ValidationType};
+use crate::validation::ValidationType;
 
 mod validation;
 
@@ -31,10 +31,9 @@ enum PlainValidationType {
 
 #[derive(FromForm)]
 struct Validation<'r> {
-    cddl: &'r str,
-    lib: ValidationLibrary,
     #[field(name = "withExtra")]
     with_extra: PlainValidationType,
+    cddl: &'r str,
     json: &'r str,
     file: TempFile<'r>,
 }
@@ -54,14 +53,12 @@ fn get_temp_file_content(file: &TempFile) -> Vec<u8> {
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
 struct ValidationResponse {
-    #[serde(rename = "alertType")]
-    alert_type: String,
     title: String,
-    message: Option<String>,
+    message: String,
 }
 
 #[post("/validate", data = "<validation_data>")]
-fn validate(validation_data: Form<Validation<'_>>) -> Json<ValidationResponse> {
+fn validate(validation_data: Form<Validation<'_>>) -> Json<Vec<ValidationResponse>> {
     let form_cddl = validation_data.cddl.to_string();
     let validation_type = match validation_data.with_extra {
         PlainValidationType::Plain => ValidationType::Plain(form_cddl),
@@ -74,21 +71,12 @@ fn validate(validation_data: Form<Validation<'_>>) -> Json<ValidationResponse> {
         ),
     };
 
-    let result = validation::validate(validation_data.lib.clone(), validation_type);
-
-    if result.is_ok() {
-        return Json(ValidationResponse {
-            alert_type: "success".to_string(),
-            title: "Validation successful".to_string(),
-            message: None,
-        });
-    }
-
-    Json(ValidationResponse {
-        alert_type: "warning".to_string(),
-        title: "Validation failed".to_string(),
-        message: Some(result.err().unwrap()),
-    })
+    Json(validation::validate_all(validation_type).iter()
+        .map(|data| ValidationResponse {
+            title: format!("{}:", data.0.clone()),
+            message: data.1.clone(),
+        })
+        .collect())
 }
 
 #[launch]
