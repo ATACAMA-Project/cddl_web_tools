@@ -2,8 +2,6 @@ const json = document.getElementById("json");
 const jsonInput = json.querySelector("textarea");
 const cbor = document.getElementById("cbor");
 const cborInput = cbor.querySelector("input");
-const cuddleRadio = document.getElementById("cuddleRadio");
-const cddlRadio = document.getElementById("cddlRadio");
 const withExtra = document.querySelector("input[name='withExtra']");
 
 function change(type) {
@@ -13,10 +11,7 @@ function change(type) {
     cbor.style.display = type === "cbor" ? "block" : "none";
     cborInput.required = type === "cbor";
 
-    cuddleRadio.disabled = type !== "plain";
-    if (type !== "plain" && cuddleRadio.checked) {
-        cddlRadio.checked = true;
-    }
+    handle = type === "codegen" ? download : submit;
 }
 
 const submitBtn = document.getElementById("submitBtn");
@@ -24,6 +19,17 @@ const loadingText = document.getElementById("loadingText");
 const readyText = document.getElementById("readyText");
 const results = document.getElementById("results");
 const form = document.querySelector("form");
+
+function download() {
+    fetch("/generate", {
+        method: "POST", body: new FormData(form)
+    })
+  .then( res => res.blob() )
+  .then( blob => {
+      const file = window.URL.createObjectURL(blob);
+      window.location.assign(file);
+  });
+}
 
 function submit() {
     function escape(unsafe) {
@@ -77,16 +83,18 @@ function submit() {
         });
 }
 
+handle = submit;
+
 form.addEventListener("submit", (e) => {
     e.preventDefault();
-    submit();
+    handle();
 });
 
 document.querySelectorAll("textarea").forEach(textArea => {
     textArea.addEventListener("keydown", function (e) {
         if (e.ctrlKey && e.key === "Enter") {
             e.preventDefault();
-            submit();
+            handle();
         }
     });
 });

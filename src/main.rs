@@ -32,6 +32,8 @@ enum PlainValidationType {
     WithJson,
     #[field(value = "cbor")]
     WithCbor,
+    #[field(value = "codegen")]
+    CodeGen,
 }
 
 #[derive(FromForm)]
@@ -66,6 +68,10 @@ struct ValidationResponse {
 fn validate(validation_data: Form<Validation<'_>>) -> Json<Vec<ValidationResponse>> {
     let form_cddl = validation_data.cddl.to_string();
     let validation_type = match validation_data.with_extra {
+        PlainValidationType::CodeGen => return Json(vec![(ValidationResponse {
+            title: "Code generation:".to_string(),
+            message: "Invalid validation!".to_string(),
+        })]),
         PlainValidationType::Plain => ValidationType::Plain(form_cddl),
         PlainValidationType::WithJson => {
             ValidationType::WithJson(form_cddl, validation_data.json.to_string())
@@ -84,22 +90,11 @@ fn validate(validation_data: Form<Validation<'_>>) -> Json<Vec<ValidationRespons
         .collect())
 }
 
-#[derive(FromForm)]
-struct Gen<'r> {
-    data: &'r str,
-}
-
-#[get("/generation")]
-async fn generation() -> NamedFile {
-    let file_path = Path::new("static/generation.html");
-    NamedFile::open(file_path).await.unwrap()
-}
-
-#[post("/generate", data = "<cddl>")]
-async fn generate(cddl: Form<Gen<'_>>) -> Option<NamedFile> {
+#[post("/generate", data = "<data>")]
+async fn generate(data: Form<Validation<'_>>) -> Option<NamedFile> {
     let root = tempdir().unwrap();
     let mut args = Cli::default();
-    generate_code(root.path(), &cddl.data, &mut args).unwrap();
+    generate_code(root.path(), data.cddl, &mut args).unwrap();
     NamedFile::open(root.path().join(GEN_ZIP_FILE).as_path())
         .await
         .ok()
@@ -108,6 +103,6 @@ async fn generate(cddl: Form<Gen<'_>>) -> Option<NamedFile> {
 #[launch]
 fn rocket() -> Rocket<Build> {
     rocket::build()
-        .mount("/", routes![index, validate, generation, generate])
+        .mount("/", routes![index, validate, generate])
         .mount("/static", FileServer::from(relative!("static")))
 }
