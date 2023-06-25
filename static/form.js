@@ -55,7 +55,13 @@ function submit() {
             return response.json();
         })
         .then(data => {
-            results.innerHTML = renderJSON(data.alertType, data.title, data.message);
+            if (data.length === 0) {
+                results.innerHTML = renderJSON("success", "Validation successful", "There are no errors in the input.");
+            } else {
+                results.innerHTML = data.map((d) => {
+                    return renderJSON("danger", d.title, d.message);
+                }).join("\n");
+            }
         })
         .catch(e => {
             if (e instanceof Response) {
