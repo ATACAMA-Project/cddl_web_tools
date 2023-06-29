@@ -27,10 +27,7 @@ function renderJSON(alertType, title, message) {
         return new Option(unsafe).innerHTML;
     }
 
-    return "<pre class=\"alert alert-" + alertType + "\" role=\"alert\">" +
-        "<h4 class=\"alert-heading\">" + escape(title) + "</h4>" +
-        "<p>" + escape(message) + "</p>" +
-        "</pre>";
+    return `<pre class="alert alert-${alertType}" role="alert"><h4 class="alert-heading">${escape(title)}</h4><p>${escape(message)}</p></pre>`;
 }
 
 function download() {
