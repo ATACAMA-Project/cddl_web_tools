@@ -1,3 +1,4 @@
+use std::error::Error;
 use cddl_codegen::cli::Cli;
 use cddl_codegen::generation::GenerationScope;
 use cddl_codegen::intermediate::{CDDLIdent, IntermediateTypes, RustIdent};
@@ -13,7 +14,7 @@ use zip::write::FileOptions;
 
 pub const GEN_ZIP_FILE: &str = "gen.zip";
 
-pub fn generate_code(root: &Path, cddl_str: &str, args: &mut Cli) -> Result<OsString, ZipError> {
+pub fn generate_code(root: &Path, cddl_str: &str, args: &mut Cli) -> Result<OsString, Box<dyn Error>> {
     args.static_dir = PathBuf::from("codegen/static");
     let gen_path = root.join("gen");
     args.output = gen_path.clone();
@@ -31,9 +32,9 @@ pub fn generate_code(root: &Path, cddl_str: &str, args: &mut Cli) -> Result<OsSt
     input_files_content.push_str(&format!("{} = [1]", parsing::RAW_BYTES_MARKER));
 
     // Plain group / scope marking
-    let cddl = cddl::parser::cddl_from_str(&input_files_content, true).unwrap();
+    let cddl = cddl::parser::cddl_from_str(&input_files_content, false)?;
     //panic!("cddl: {:#.unwrap()}", cddl);
-    let pv = cddl::ast::parent::ParentVisitor::new(&cddl).unwrap();
+    let pv = cddl::ast::parent::ParentVisitor::new(&cddl)?;
     let mut types = IntermediateTypes::new();
     // mark scope and filter scope markers
     let mut scope = "lib".to_owned();
@@ -60,13 +61,13 @@ pub fn generate_code(root: &Path, cddl_str: &str, args: &mut Cli) -> Result<OsSt
             // Freely defined group - no need to generate anything outside of group module
             match &rule.entry {
                 cddl::ast::GroupEntry::InlineGroup { group, .. } => {
-                    types.mark_plain_group(
+                    Ok(types.mark_plain_group(
                         RustIdent::new(CDDLIdent::new(rule.name.to_string())),
                         Some(group.clone()),
-                    );
+                    ))
                 }
-                x => panic!("Group rule with non-inline group.unwrap() {:?}", x),
-            }
+                x => Err(format!("Group rule with non-inline group.unwrap() {:?}", x)),
+            }?
         }
     }
 
@@ -81,13 +82,13 @@ pub fn generate_code(root: &Path, cddl_str: &str, args: &mut Cli) -> Result<OsSt
     println!("\n-----------------------------------------\n- Generating code...\n------------------------------------");
     let mut gen_scope = GenerationScope::new();
     gen_scope.generate(&types, args);
-    gen_scope.export(&types, args).unwrap();
+    gen_scope.export(&types, args)?;
     types.print_info();
 
     gen_scope.print_structs_without_deserialize();
 
     let gen_zip = root.join(GEN_ZIP_FILE);
-    let _ = doit(
+    let _ = generate_zip(
         gen_path.to_str().unwrap(),
         gen_zip.to_str().unwrap(),
         zip::CompressionMethod::Deflated,
@@ -139,13 +140,13 @@ where
     zip.finish()
 }
 
-fn doit(src_dir: &str, dst_file: &str, method: zip::CompressionMethod) -> ZipResult<File> {
+fn generate_zip(src_dir: &str, dst_file: &str, method: zip::CompressionMethod) -> ZipResult<File> {
     if !Path::new(src_dir).is_dir() {
         return Err(ZipError::FileNotFound);
     }
 
     let path = Path::new(dst_file);
-    let file = File::create(path).unwrap();
+    let file = File::create(path)?;
 
     let walkdir = WalkDir::new(src_dir);
     let it = walkdir.into_iter();
