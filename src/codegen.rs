@@ -1,15 +1,16 @@
 use std::error::Error;
-use cddl_codegen::cli::Cli;
-use cddl_codegen::generation::GenerationScope;
-use cddl_codegen::intermediate::{CDDLIdent, IntermediateTypes, RustIdent};
-use cddl_codegen::parsing::{parse_rule, rule_ident, rule_is_scope_marker};
-use cddl_codegen::{dep_graph, parsing};
 use std::ffi::OsString;
 use std::fs::File;
 use std::io::{Read, Seek, Write};
 use std::path::{Path, PathBuf};
+
+use cddl_codegen::{dep_graph, parsing};
+use cddl_codegen::cli::Cli;
+use cddl_codegen::generation::GenerationScope;
+use cddl_codegen::intermediate::{CDDLIdent, IntermediateTypes, RustIdent};
+use cddl_codegen::parsing::{parse_rule, rule_ident, rule_is_scope_marker};
 use walkdir::{DirEntry, WalkDir};
-use zip::result::{ZipError, ZipResult};
+use zip::result::ZipError;
 use zip::write::FileOptions;
 
 pub const GEN_ZIP_FILE: &str = "gen.zip";
@@ -89,8 +90,8 @@ pub fn generate_code(root: &Path, cddl_str: &str, args: &mut Cli) -> Result<OsSt
 
     let gen_zip = root.join(GEN_ZIP_FILE);
     let _ = generate_zip(
-        gen_path.to_str().unwrap(),
-        gen_zip.to_str().unwrap(),
+        gen_path.to_str().ok_or("Failed to convert gen_path to str")?,
+        gen_zip.to_str().ok_or("Failed to convert gen_zip to str")?,
         zip::CompressionMethod::Deflated,
     )?;
 
@@ -100,13 +101,13 @@ pub fn generate_code(root: &Path, cddl_str: &str, args: &mut Cli) -> Result<OsSt
 // Copied from https://github.com/zip-rs/zip/blob/master/examples/write_dir.rs
 
 fn zip_dir<T>(
-    it: &mut dyn Iterator<Item = DirEntry>,
+    it: &mut dyn Iterator<Item=DirEntry>,
     prefix: &str,
     writer: T,
     method: zip::CompressionMethod,
-) -> ZipResult<T>
-where
-    T: Write + Seek,
+) -> Result<T, Box<dyn Error>>
+    where
+        T: Write + Seek,
 {
     let mut zip = zip::ZipWriter::new(writer);
     let options = FileOptions::default()
@@ -116,7 +117,8 @@ where
     let mut buffer = Vec::new();
     for entry in it {
         let path = entry.path();
-        let name = path.strip_prefix(Path::new(prefix)).unwrap();
+        let name = path.strip_prefix(Path::new(prefix))
+            .map_err(Box::new)?;
 
         // Write file or directory explicitly
         // Some unzip tools unzip files with directory paths correctly, some do not!
@@ -137,12 +139,12 @@ where
             zip.add_directory_from_path(name, options)?;
         }
     }
-    zip.finish()
+    zip.finish().map_err(|e| e.into())
 }
 
-fn generate_zip(src_dir: &str, dst_file: &str, method: zip::CompressionMethod) -> ZipResult<File> {
+fn generate_zip(src_dir: &str, dst_file: &str, method: zip::CompressionMethod) -> Result<File, Box<dyn Error>> {
     if !Path::new(src_dir).is_dir() {
-        return Err(ZipError::FileNotFound);
+        return Err(ZipError::FileNotFound.into());
     }
 
     let path = Path::new(dst_file);
