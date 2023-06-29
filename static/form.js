@@ -20,32 +20,46 @@ const readyText = document.getElementById("readyText");
 const results = document.getElementById("results");
 const form = document.querySelector("form");
 
-function download() {
-    fetch("/generate", {
-        method: "POST", body: new FormData(form)
-    })
-  .then( res => res.blob() )
-  .then( blob => {
-      const file = window.URL.createObjectURL(blob);
-      window.location.assign(file);
-  });
-}
-
-function submit() {
+function renderJSON(alertType, title, message) {
     function escape(unsafe) {
-        if (typeof unsafe !== "string")
-            return "";
+        if (typeof unsafe !== "string") return "";
 
         return new Option(unsafe).innerHTML;
     }
 
-    function renderJSON(alertType, title, message) {
-        return "<pre class=\"alert alert-" + alertType + "\" role=\"alert\">" +
-            "<h4 class=\"alert-heading\">" + escape(title) + "</h4>" +
-            "<p>" + escape(message) + "</p>" +
-            "</pre>";
-    }
+    return "<pre class=\"alert alert-" + alertType + "\" role=\"alert\">" +
+        "<h4 class=\"alert-heading\">" + escape(title) + "</h4>" +
+        "<p>" + escape(message) + "</p>" +
+        "</pre>";
+}
 
+function download() {
+    fetch("/generate", {
+        method: "POST", body: new FormData(form)
+    })
+        .then(async response => {
+            if (response.status === 400) {
+                return Promise.reject(await response.text());
+            } else if (!response.ok) {
+                return Promise.reject(response);
+            }
+
+            let blob = await response.blob();
+            const file = window.URL.createObjectURL(blob);
+            window.location.assign(file);
+        })
+        .catch(e => {
+            if (typeof e === 'string') {
+                results.innerHTML = renderJSON("warning", "Internal error:", e);
+            } else if (e instanceof Response) {
+                results.innerHTML = renderJSON("danger", "HTTP: " + e.status, e.statusText)
+            } else {
+                results.innerHTML = renderJSON("danger", "Invalid Response: ", e.message);
+            }
+        });
+}
+
+function submit() {
     submitBtn.disabled = true;
     readyText.style.display = "none";
     loadingText.style.display = "block";
