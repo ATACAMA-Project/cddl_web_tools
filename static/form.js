@@ -46,7 +46,11 @@ function download() {
 
             let blob = await response.blob();
             const file = window.URL.createObjectURL(blob);
-            window.location.assign(file);
+            const a = document.createElement("a");
+            a.href = file;
+            a.download = "generated_code.zip";
+            a.click();
+            window.URL.revokeObjectURL(file);
         })
         .catch(e => {
             if (typeof e === 'string') {
