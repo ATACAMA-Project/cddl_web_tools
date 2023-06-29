@@ -1,23 +1,28 @@
-mod validation;
-
 #[macro_use]
 extern crate rocket;
 
-extern crate rocket_dyn_templates;
-
-use crate::validation::{ValidationLibrary, ValidationType};
-use rocket::form::Form;
-use rocket::fs::{relative, FileServer, TempFile};
-use rocket::{Request, Response};
-use rocket::{Build, Rocket};
-use rocket_dyn_templates::{context, Template};
+use std::error::Error;
 use std::io::Read;
-use rocket::fairing::{Fairing, Info, Kind};
-use rocket::http::Header;
+use std::path::Path;
+
+use cddl_codegen::cli::Cli;
+use rocket::{Build, Rocket};
+use rocket::form::Form;
+use rocket::fs::{FileServer, NamedFile, relative, TempFile};
+use rocket::serde::{json::Json, Serialize};
+use tempfile::tempdir;
+
+use codegen::{GEN_ZIP_FILE, generate_code};
+
+use crate::validation::ValidationType;
+
+mod codegen;
+mod validation;
 
 #[get("/")]
-fn index() -> Template {
-    Template::render("index", context! {})
+async fn index() -> NamedFile {
+    let file_path = Path::new("static/index.html");
+    NamedFile::open(file_path).await.unwrap()
 }
 
 #[non_exhaustive]
@@ -28,14 +33,15 @@ enum PlainValidationType {
     WithJson,
     #[field(value = "cbor")]
     WithCbor,
+    #[field(value = "codegen")]
+    CodeGen,
 }
 
 #[derive(FromForm)]
 struct Validation<'r> {
-    cddl: &'r str,
-    lib: ValidationLibrary,
     #[field(name = "withExtra")]
     with_extra: PlainValidationType,
+    cddl: &'r str,
     json: &'r str,
     file: TempFile<'r>,
 }
@@ -52,10 +58,21 @@ fn get_temp_file_content(file: &TempFile) -> Vec<u8> {
     }
 }
 
+#[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
+struct ValidationResponse {
+    title: String,
+    message: String,
+}
+
 #[post("/validate", data = "<validation_data>")]
-fn validate(validation_data: Form<Validation<'_>>) -> Template {
+fn validate(validation_data: Form<Validation<'_>>) -> Json<Vec<ValidationResponse>> {
     let form_cddl = validation_data.cddl.to_string();
     let validation_type = match validation_data.with_extra {
+        PlainValidationType::CodeGen => return Json(vec![(ValidationResponse {
+            title: "Code generation:".to_string(),
+            message: "Invalid validation!".to_string(),
+        })]),
         PlainValidationType::Plain => ValidationType::Plain(form_cddl),
         PlainValidationType::WithJson => {
             ValidationType::WithJson(form_cddl, validation_data.json.to_string())
@@ -66,51 +83,43 @@ fn validate(validation_data: Form<Validation<'_>>) -> Template {
         ),
     };
 
-    let result = validation::validate(validation_data.lib.clone(), validation_type);
+    Json(validation::validate_all(validation_type).iter()
+        .map(|data| ValidationResponse {
+            title: format!("{}:", data.0.clone()),
+            message: data.1.clone(),
+        })
+        .collect())
+}
 
-    if result.is_ok() {
-        return Template::render(
-            "response",
-            context! {
-                mtype: "success",
-                details: "The CDDL is valid!",
-            },
-        );
+#[derive(Responder)]
+#[response(status = 400)]
+struct GenerationError(String);
+
+impl From<std::io::Error> for GenerationError {
+    fn from(err: std::io::Error) -> Self {
+        GenerationError(err.to_string())
     }
+}
 
-    Template::render(
-        "response",
-        context! {
-            mtype: "warning",
-            details: result.err().unwrap(),
-        },
-    )
+impl From<Box<dyn Error>> for GenerationError {
+    fn from(err: Box<dyn Error>) -> Self {
+        GenerationError(err.to_string())
+    }
+}
+
+#[post("/generate", data = "<data>")]
+async fn generate(data: Form<Validation<'_>>) -> Result<NamedFile, GenerationError> {
+    let root = tempdir()?;
+    let mut args = Cli::default();
+    generate_code(root.path(), data.cddl, &mut args)?;
+    let file = NamedFile::open(root.path().join(GEN_ZIP_FILE).as_path())
+        .await?;
+    Ok(file)
 }
 
 #[launch]
 fn rocket() -> Rocket<Build> {
     rocket::build()
-        .mount("/", routes![index, validate])
+        .mount("/", routes![index, validate, generate])
         .mount("/static", FileServer::from(relative!("static")))
-        .attach(Template::fairing())
-        .attach(CORS)
-}
-
-pub struct CORS;
-
-#[rocket::async_trait]
-impl Fairing for CORS {
-    fn info(&self) -> Info {
-        Info {
-            name: "Add CORS headers to responses",
-            kind: Kind::Response,
-        }
-    }
-
-    async fn on_response<'r>(&self, _request: &'r Request<'_>, response: &mut Response<'r>) {
-        response.set_header(Header::new("Access-Control-Allow-Origin", "*"));
-        response.set_header(Header::new("Access-Control-Allow-Methods", "POST"));
-        response.set_header(Header::new("Access-Control-Allow-Headers", "*"));
-        response.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
-    }
 }

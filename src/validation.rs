@@ -1,6 +1,6 @@
 use cddl::{cddl_from_str, validate_cbor_from_slice, validate_json_from_str};
 use cddl_cat::{parse_cddl as parse_cat, validate_cbor_bytes, validate_json_str, ValidateResult};
-use cuddle::{parse_cddl as parse_cuddle};
+use cuddle::parse_cddl as parse_cuddle;
 
 #[non_exhaustive]
 #[derive(FromFormField, Clone)]
@@ -10,7 +10,18 @@ pub enum ValidationLibrary {
     Cuddle,
 }
 
+impl std::fmt::Display for ValidationLibrary {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ValidationLibrary::Cddl => write!(f, "cddl"),
+            ValidationLibrary::CddlCat => write!(f, "cddl-cat"),
+            ValidationLibrary::Cuddle => write!(f, "cuddle"),
+        }
+    }
+}
+
 #[non_exhaustive]
+#[derive(Clone)]
 pub enum ValidationType {
     Plain(String),
     WithJson(String, String),
@@ -18,6 +29,23 @@ pub enum ValidationType {
 }
 
 static FILENAME: &str = "cddl.cddl";
+
+pub fn validate_all(validation_type: ValidationType) -> Vec<(String, String)> {
+    let libraries = if let ValidationType::Plain(..) = validation_type {
+        vec![ValidationLibrary::Cddl, ValidationLibrary::CddlCat, ValidationLibrary::Cuddle]
+    } else {
+        vec![ValidationLibrary::Cddl, ValidationLibrary::CddlCat]
+    };
+
+    libraries.iter()
+        .filter_map(|library| {
+            match validate(library.clone(), validation_type.clone()) {
+                Err(err) => Some((library.to_string(), err)),
+                Ok(_) => None,
+            }
+        })
+        .collect()
+}
 
 pub fn validate(library: ValidationLibrary, validation_type: ValidationType) -> Result<(), String> {
     match library {
