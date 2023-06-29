@@ -44,7 +44,7 @@ function download() {
                 return Promise.reject(response);
             }
 
-            let blob = await response.blob();
+            const blob = await response.blob();
             const file = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = file;
@@ -76,7 +76,7 @@ function submit() {
                 return Promise.reject(response);
             }
 
-            let data = await response.json();
+            const data = await response.json();
             if (data.length === 0) {
                 results.innerHTML = renderJSON("success", "Validation successful", "There are no errors in the input.");
             } else {
