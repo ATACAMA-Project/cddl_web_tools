@@ -2,8 +2,6 @@ const json = document.getElementById("json");
 const jsonInput = json.querySelector("textarea");
 const cbor = document.getElementById("cbor");
 const cborInput = cbor.querySelector("input");
-const cuddleRadio = document.getElementById("cuddleRadio");
-const cddlRadio = document.getElementById("cddlRadio");
 const withExtra = document.querySelector("input[name='withExtra']");
 
 function change(type) {
@@ -12,11 +10,6 @@ function change(type) {
     jsonInput.required = type === "json";
     cbor.style.display = type === "cbor" ? "block" : "none";
     cborInput.required = type === "cbor";
-
-    cuddleRadio.disabled = type !== "plain";
-    if (type !== "plain" && cuddleRadio.checked) {
-        cddlRadio.checked = true;
-    }
 }
 
 const submitBtn = document.getElementById("submitBtn");
