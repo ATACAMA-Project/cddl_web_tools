@@ -40,14 +40,12 @@ function submit() {
     fetch("/validate", {
         method: "POST", body: new FormData(form)
     })
-        .then(response => {
+        .then(async response => {
             if (!response.ok) {
                 return Promise.reject(response);
             }
 
-            return response.json();
-        })
-        .then(data => {
+            let data = await response.json();
             if (data.length === 0) {
                 results.innerHTML = renderJSON("success", "Validation successful", "There are no errors in the input.");
             } else {
