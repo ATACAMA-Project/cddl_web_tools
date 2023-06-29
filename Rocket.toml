@@ -1,4 +1,4 @@
 [release]
-port = 443
-address = "0.0.0.0"
-tls = { certs = "/mnt/ssl/fullchain.pem", key = "/mnt/ssl/privkey.pem" }
+# a HTTP alternative port - so there should not be a connection running under it by default.
+# Also one I have not seen as the default for http development server / frameworks.
+port = 8008
