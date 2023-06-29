@@ -91,13 +91,13 @@ fn validate(validation_data: Form<Validation<'_>>) -> Json<Vec<ValidationRespons
 }
 
 #[post("/generate", data = "<data>")]
-async fn generate(data: Form<Validation<'_>>) -> Option<NamedFile> {
-    let root = tempdir().unwrap();
+async fn generate(data: Form<Validation<'_>>) -> Result<NamedFile, String> {
+    let root = tempdir().map_err(|e| e.to_string())?;
     let mut args = Cli::default();
-    generate_code(root.path(), data.cddl, &mut args).unwrap();
+    generate_code(root.path(), data.cddl, &mut args).map_err(|e| e.to_string())?;
     NamedFile::open(root.path().join(GEN_ZIP_FILE).as_path())
         .await
-        .ok()
+        .map_err(|e| e.to_string())
 }
 
 #[launch]
