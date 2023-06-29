@@ -50,7 +50,7 @@ function submit() {
                 results.innerHTML = renderJSON("success", "Validation successful", "There are no errors in the input.");
             } else {
                 results.innerHTML = data.map((d) => {
-                    return renderJSON("danger", d.title, d.message);
+                    return renderJSON("warning", d.title, d.message);
                 }).join("\n");
             }
         })
