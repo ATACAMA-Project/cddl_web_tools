@@ -45,7 +45,6 @@ pub fn generate_code(root: &Path, cddl_str: &str, args: &mut Cli) -> Result<OsSt
         .filter(|cddl_rule| {
             // We inserted string constants with specific prefixes earlier to mark scope
             if let Some(new_scope) = rule_is_scope_marker(cddl_rule) {
-                println!("Switching from scope '{scope}' to '{new_scope}'");
                 scope = new_scope;
                 false
             } else {
@@ -75,19 +74,14 @@ pub fn generate_code(root: &Path, cddl_str: &str, args: &mut Cli) -> Result<OsSt
 
     // Creating intermediate form from the CDDL
     for cddl_rule in dep_graph::topological_rule_order(&cddl_rules) {
-        println!("\n\n------------------------------------------\n- Handling rule: {}:{}\n------------------------------------", scope, cddl_rule.name());
         parse_rule(&mut types, &pv, cddl_rule, args);
     }
     types.finalize(&pv, args);
 
     // Generating code from intermediate form
-    println!("\n-----------------------------------------\n- Generating code...\n------------------------------------");
     let mut gen_scope = GenerationScope::new();
     gen_scope.generate(&types, args);
     gen_scope.export(&types, args)?;
-    types.print_info();
-
-    gen_scope.print_structs_without_deserialize();
 
     let gen_zip = root.join(GEN_ZIP_FILE);
     let _ = generate_zip(
@@ -123,7 +117,6 @@ fn zip_dir<T>(
         // Write file or directory explicitly
         // Some unzip tools unzip files with directory paths correctly, some do not!
         if path.is_file() {
-            println!("adding file {path:?} as {name:?} ...");
             #[allow(deprecated)]
             zip.start_file_from_path(name, options)?;
             let mut f = File::open(path)?;
@@ -132,9 +125,6 @@ fn zip_dir<T>(
             zip.write_all(&buffer)?;
             buffer.clear();
         } else if !name.as_os_str().is_empty() {
-            // Only if not root! Avoids path spec / warning
-            // and mapname conversion failed error on unzip
-            println!("adding dir {path:?} as {name:?} ...");
             #[allow(deprecated)]
             zip.add_directory_from_path(name, options)?;
         }
