@@ -1,7 +1,16 @@
 #!/bin/bash
 
+set -e
+
+# update code
+git reset prod --hard
+git pull
+
+# update submodules
+git submodule update
+
+# update dependencies
+cargo update
+
+# build
 cargo build --release
-
-sudo setcap 'cap_net_bind_service=+ep' target/release/cddl_web_tools
-
-# ./target/release/cddl_web_tools
