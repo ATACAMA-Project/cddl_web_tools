@@ -62,10 +62,11 @@ pub fn generate_code(root: &Path, cddl_str: &str, args: &mut Cli) -> Result<OsSt
             // Freely defined group - no need to generate anything outside of group module
             match &rule.entry {
                 cddl::ast::GroupEntry::InlineGroup { group, .. } => {
-                    Ok(types.mark_plain_group(
+                    types.mark_plain_group(
                         RustIdent::new(CDDLIdent::new(rule.name.to_string())),
                         Some(group.clone()),
-                    ))
+                    );
+                    Ok(())
                 }
                 x => Err(format!("Group rule with non-inline group.unwrap() {:?}", x)),
             }?
