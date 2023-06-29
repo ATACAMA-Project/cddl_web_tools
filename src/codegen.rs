@@ -117,16 +117,14 @@ fn zip_dir<T>(
         // Write file or directory explicitly
         // Some unzip tools unzip files with directory paths correctly, some do not!
         if path.is_file() {
-            #[allow(deprecated)]
-            zip.start_file_from_path(name, options)?;
+            zip.start_file(name.to_string_lossy().into_owned(), options)?;
             let mut f = File::open(path)?;
 
             f.read_to_end(&mut buffer)?;
             zip.write_all(&buffer)?;
             buffer.clear();
         } else if !name.as_os_str().is_empty() {
-            #[allow(deprecated)]
-            zip.add_directory_from_path(name, options)?;
+            zip.add_directory(name.to_string_lossy().into_owned(), options)?;
         }
     }
     zip.finish().map_err(|e| e.into())
