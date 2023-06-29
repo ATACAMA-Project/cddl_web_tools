@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate rocket;
 
+use std::error::Error;
 use std::io::Read;
 use std::path::Path;
 
@@ -90,14 +91,30 @@ fn validate(validation_data: Form<Validation<'_>>) -> Json<Vec<ValidationRespons
         .collect())
 }
 
+#[derive(Responder)]
+#[response(status = 400)]
+struct GenerationError(String);
+
+impl From<std::io::Error> for GenerationError {
+    fn from(err: std::io::Error) -> Self {
+        GenerationError(err.to_string())
+    }
+}
+
+impl From<Box<dyn Error>> for GenerationError {
+    fn from(err: Box<dyn Error>) -> Self {
+        GenerationError(err.to_string())
+    }
+}
+
 #[post("/generate", data = "<data>")]
-async fn generate(data: Form<Validation<'_>>) -> Result<NamedFile, String> {
-    let root = tempdir().map_err(|e| e.to_string())?;
+async fn generate(data: Form<Validation<'_>>) -> Result<NamedFile, GenerationError> {
+    let root = tempdir()?;
     let mut args = Cli::default();
-    generate_code(root.path(), data.cddl, &mut args).map_err(|e| e.to_string())?;
-    NamedFile::open(root.path().join(GEN_ZIP_FILE).as_path())
-        .await
-        .map_err(|e| e.to_string())
+    generate_code(root.path(), data.cddl, &mut args)?;
+    let file = NamedFile::open(root.path().join(GEN_ZIP_FILE).as_path())
+        .await?;
+    Ok(file)
 }
 
 #[launch]
