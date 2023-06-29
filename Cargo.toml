@@ -8,3 +8,7 @@ rocket = { version = "0.5.0-rc.3", features = ["json"] }
 cddl = "0.9.1"
 cddl-cat = "0.6.1"
 cuddle = { git = "https://github.com/hansl/cuddle/", rev = "8cead05" }
+cddl-codegen = { git = "https://github.com/dcSpark/cddl-codegen" }
+tempfile = "3"
+zip = "0.6.4"
+walkdir = "2.3.3"

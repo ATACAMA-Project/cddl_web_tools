@@ -10,6 +10,8 @@ function change(type) {
     jsonInput.required = type === "json";
     cbor.style.display = type === "cbor" ? "block" : "none";
     cborInput.required = type === "cbor";
+
+    handle = type === "codegen" ? download : submit;
 }
 
 const submitBtn = document.getElementById("submitBtn");
@@ -18,21 +20,50 @@ const readyText = document.getElementById("readyText");
 const results = document.getElementById("results");
 const form = document.querySelector("form");
 
-function submit() {
+function renderJSON(alertType, title, message) {
     function escape(unsafe) {
-        if (typeof unsafe !== "string")
-            return "";
+        if (typeof unsafe !== "string") return "";
 
         return new Option(unsafe).innerHTML;
     }
 
-    function renderJSON(alertType, title, message) {
-        return "<pre class=\"alert alert-" + alertType + "\" role=\"alert\">" +
-            "<h4 class=\"alert-heading\">" + escape(title) + "</h4>" +
-            "<p>" + escape(message) + "</p>" +
-            "</pre>";
-    }
+    return "<pre class=\"alert alert-" + alertType + "\" role=\"alert\">" +
+        "<h4 class=\"alert-heading\">" + escape(title) + "</h4>" +
+        "<p>" + escape(message) + "</p>" +
+        "</pre>";
+}
 
+function download() {
+    fetch("/generate", {
+        method: "POST", body: new FormData(form)
+    })
+        .then(async response => {
+            if (response.status === 400) {
+                return Promise.reject(await response.text());
+            } else if (!response.ok) {
+                return Promise.reject(response);
+            }
+
+            let blob = await response.blob();
+            const file = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = file;
+            a.download = "generated_code.zip";
+            a.click();
+            window.URL.revokeObjectURL(file);
+        })
+        .catch(e => {
+            if (typeof e === 'string') {
+                results.innerHTML = renderJSON("warning", "Internal error:", e);
+            } else if (e instanceof Response) {
+                results.innerHTML = renderJSON("danger", "HTTP: " + e.status, e.statusText)
+            } else {
+                results.innerHTML = renderJSON("danger", "Invalid Response: ", e.message);
+            }
+        });
+}
+
+function submit() {
     submitBtn.disabled = true;
     readyText.style.display = "none";
     loadingText.style.display = "block";
@@ -68,16 +99,18 @@ function submit() {
         });
 }
 
+handle = submit;
+
 form.addEventListener("submit", (e) => {
     e.preventDefault();
-    submit();
+    handle();
 });
 
 document.querySelectorAll("textarea").forEach(textArea => {
     textArea.addEventListener("keydown", function (e) {
         if (e.ctrlKey && e.key === "Enter") {
             e.preventDefault();
-            submit();
+            handle();
         }
     });
 });

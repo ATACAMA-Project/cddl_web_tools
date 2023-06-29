@@ -1,16 +1,22 @@
 #[macro_use]
 extern crate rocket;
 
+use std::error::Error;
 use std::io::Read;
 use std::path::Path;
 
+use cddl_codegen::cli::Cli;
 use rocket::{Build, Rocket};
 use rocket::form::Form;
 use rocket::fs::{FileServer, NamedFile, relative, TempFile};
 use rocket::serde::{json::Json, Serialize};
+use tempfile::tempdir;
+
+use codegen::{GEN_ZIP_FILE, generate_code};
 
 use crate::validation::ValidationType;
 
+mod codegen;
 mod validation;
 
 #[get("/")]
@@ -27,6 +33,8 @@ enum PlainValidationType {
     WithJson,
     #[field(value = "cbor")]
     WithCbor,
+    #[field(value = "codegen")]
+    CodeGen,
 }
 
 #[derive(FromForm)]
@@ -61,6 +69,10 @@ struct ValidationResponse {
 fn validate(validation_data: Form<Validation<'_>>) -> Json<Vec<ValidationResponse>> {
     let form_cddl = validation_data.cddl.to_string();
     let validation_type = match validation_data.with_extra {
+        PlainValidationType::CodeGen => return Json(vec![(ValidationResponse {
+            title: "Code generation:".to_string(),
+            message: "Invalid validation!".to_string(),
+        })]),
         PlainValidationType::Plain => ValidationType::Plain(form_cddl),
         PlainValidationType::WithJson => {
             ValidationType::WithJson(form_cddl, validation_data.json.to_string())
@@ -79,9 +91,35 @@ fn validate(validation_data: Form<Validation<'_>>) -> Json<Vec<ValidationRespons
         .collect())
 }
 
+#[derive(Responder)]
+#[response(status = 400)]
+struct GenerationError(String);
+
+impl From<std::io::Error> for GenerationError {
+    fn from(err: std::io::Error) -> Self {
+        GenerationError(err.to_string())
+    }
+}
+
+impl From<Box<dyn Error>> for GenerationError {
+    fn from(err: Box<dyn Error>) -> Self {
+        GenerationError(err.to_string())
+    }
+}
+
+#[post("/generate", data = "<data>")]
+async fn generate(data: Form<Validation<'_>>) -> Result<NamedFile, GenerationError> {
+    let root = tempdir()?;
+    let mut args = Cli::default();
+    generate_code(root.path(), data.cddl, &mut args)?;
+    let file = NamedFile::open(root.path().join(GEN_ZIP_FILE).as_path())
+        .await?;
+    Ok(file)
+}
+
 #[launch]
 fn rocket() -> Rocket<Build> {
     rocket::build()
-        .mount("/", routes![index, validate])
+        .mount("/", routes![index, validate, generate])
         .mount("/static", FileServer::from(relative!("static")))
 }

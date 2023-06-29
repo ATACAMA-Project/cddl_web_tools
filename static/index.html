@@ -41,6 +41,11 @@
                 aria-selected="true">CDDL+CBOR
         </button>
       </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" type="button" data-bs-toggle="tab" role="tab" onclick="change('codegen')"
+                aria-selected="true">Code Generation
+        </button>
+      </li>
     </ul>
 
     <form>
@@ -84,7 +89,8 @@
           <a href="https://crates.io/crates/cddl">cddl</a>, <a href="https://crates.io/crates/cddl-cat">cddl-cat</a> or
           <a href="https://crates.io/crates/cuddle">cuddle</a> (can only validate CDDL alone).
           You can also choose to validate your CDDL alone, with a JSON or a CBOR file.
-          This site is open source and can be found on <a href="https://github.com/ATACAMA-Project/cddl_web_tools">GitHub</a>.
+          This site can also generate a rust Project for you, based on your CDDL.
+          It is open source and can be found on <a href="https://github.com/ATACAMA-Project/cddl_web_tools">GitHub</a>.
         </p>
       </div>
       <div class="col-md-4">
