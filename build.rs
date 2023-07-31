@@ -1,9 +1,9 @@
 use std::fs::{self};
 use std::path::{Path, PathBuf};
 
-use minify_html::{Cfg, minify};
+use minify_html::{minify, Cfg};
 
-use minify_js::{minify as js_minify, Session, TopLevelMode};
+use minifier::js::minify as minify_js;
 
 fn main() {
     let mut cfg = Cfg::new();
@@ -25,10 +25,8 @@ fn main() {
     let new_fname = generate_output_filename(fname);
 
     let contents = fs::read_to_string(fname).unwrap();
-    let session = Session::new();
-    let mut out = Vec::new();
-    js_minify(&session, TopLevelMode::Global, contents.as_bytes(), &mut out).unwrap();
-    fs::write(new_fname, out).unwrap();
+    let out = minify_js(contents.as_str());
+    fs::write(new_fname, out.to_string()).unwrap();
 }
 
 fn generate_output_filename(input_filename: &str) -> PathBuf {
