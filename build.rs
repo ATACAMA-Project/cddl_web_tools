@@ -1,9 +1,9 @@
-use std::fs::{self};
+use std::fs;
 use std::path::{Path, PathBuf};
 
-use minify_html::{minify, Cfg};
+use minify_html::{Cfg, minify as minify2};
 
-use minifier::js::minify as minify_js;
+use minifier::js::minify;
 
 fn main() {
     let mut cfg = Cfg::new();
@@ -14,19 +14,16 @@ fn main() {
     cfg.remove_bangs = true;
     cfg.remove_processing_instructions = true;
 
-    let fname = "static/index.html";
-    let new_fname = generate_output_filename(fname);
+    minify_and_write("static/index.html", |str| minify2(str.as_bytes(), &cfg));
+    minify_and_write("static/form.js", |str| minify(str.as_str()).to_string());
+}
 
+fn minify_and_write<F, C: AsRef<[u8]>>(fname: &str, minify_fn: F)
+    where F: Fn(String) -> C, {
+    let new_fname = generate_output_filename(fname);
     let contents = fs::read_to_string(fname).unwrap();
-    let minified = minify(contents.as_bytes(), &cfg);
+    let minified = minify_fn(contents);
     fs::write(new_fname, minified).unwrap();
-
-    let fname = "static/form.js";
-    let new_fname = generate_output_filename(fname);
-
-    let contents = fs::read_to_string(fname).unwrap();
-    let out = minify_js(contents.as_str());
-    fs::write(new_fname, out.to_string()).unwrap();
 }
 
 fn generate_output_filename(input_filename: &str) -> PathBuf {
