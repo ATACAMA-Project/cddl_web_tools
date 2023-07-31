@@ -21,7 +21,7 @@ mod validation;
 
 #[get("/")]
 async fn index() -> NamedFile {
-    let file_path = Path::new("static/index.html");
+    let file_path = Path::new("static/index.min.html");
     NamedFile::open(file_path).await.unwrap()
 }
 
