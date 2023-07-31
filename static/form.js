@@ -4,6 +4,7 @@ const cbor = document.getElementById("cbor");
 const cborInput = cbor.querySelector("input");
 const withExtra = document.querySelector("input[name='withExtra']");
 
+// handles the display changes when a tab is clicked
 function change(type) {
     withExtra.value = type;
     json.style.display = type === "json" ? "block" : "none";
@@ -20,7 +21,9 @@ const readyText = document.getElementById("readyText");
 const results = document.getElementById("results");
 const form = document.querySelector("form");
 
+// renders the json into a bootstrap alert
 function renderJSON(alertType, title, message) {
+    // escapes the html
     function escape(unsafe) {
         if (typeof unsafe !== "string") return "";
 
@@ -30,6 +33,7 @@ function renderJSON(alertType, title, message) {
     return `<pre class="alert alert-${alertType}" role="alert"><h4 class="alert-heading">${escape(title)}</h4><p>${escape(message)}</p></pre>`;
 }
 
+// downloads code
 function download() {
     fetch("/generate", {
         method: "POST", body: new FormData(form)
@@ -41,6 +45,7 @@ function download() {
                 return Promise.reject(response);
             }
 
+            // get the file, create an Object url, create a link which targets the url and clicks it
             const blob = await response.blob();
             const file = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
@@ -60,6 +65,7 @@ function download() {
         });
 }
 
+// submits cddl for validation
 function submit() {
     submitBtn.disabled = true;
     readyText.style.display = "none";
@@ -96,13 +102,18 @@ function submit() {
         });
 }
 
-handle = submit;
+// saves what happens when submit is clicked
+let handle = submit;
 
+// handles the form submission via button click
 form.addEventListener("submit", (e) => {
+    // makes sure form is not submitted and web page is not reloaded
     e.preventDefault();
+
     handle();
 });
 
+// handles the form submission via ctrl+enter
 document.querySelectorAll("textarea").forEach(textArea => {
     textArea.addEventListener("keydown", function (e) {
         if (e.ctrlKey && e.key === "Enter") {
