@@ -1,1 +1,4 @@
 /target
+
+*.min.html
+*.min.js

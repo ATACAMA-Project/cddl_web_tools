@@ -12,3 +12,7 @@ cddl-codegen = { git = "https://github.com/dcSpark/cddl-codegen" }
 tempfile = "3"
 zip = "0.6.4"
 walkdir = "2.3.3"
+
+[build-dependencies]
+minify-html = "0.11.0"
+minify-js = "0.5.6"
