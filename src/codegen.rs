@@ -4,11 +4,11 @@ use std::fs::File;
 use std::io::{Read, Seek, Write};
 use std::path::{Path, PathBuf};
 
-use cddl_codegen::{dep_graph, parsing};
 use cddl_codegen::cli::Cli;
 use cddl_codegen::generation::GenerationScope;
 use cddl_codegen::intermediate::{CDDLIdent, IntermediateTypes, RustIdent};
 use cddl_codegen::parsing::{parse_rule, rule_ident, rule_is_scope_marker};
+use cddl_codegen::{dep_graph, parsing};
 use walkdir::{DirEntry, WalkDir};
 use zip::result::ZipError;
 use zip::write::FileOptions;
@@ -96,13 +96,13 @@ pub fn generate_code(root: &Path, cddl_str: &str, args: &mut Cli) -> Result<OsSt
 // Copied from https://github.com/zip-rs/zip/blob/master/examples/write_dir.rs
 
 fn zip_dir<T>(
-    it: &mut dyn Iterator<Item=DirEntry>,
+    it: &mut dyn Iterator<Item = DirEntry>,
     prefix: &str,
     writer: T,
     method: zip::CompressionMethod,
 ) -> Result<T, Box<dyn Error>>
-    where
-        T: Write + Seek,
+where
+    T: Write + Seek,
 {
     let mut zip = zip::ZipWriter::new(writer);
     let options = FileOptions::default()

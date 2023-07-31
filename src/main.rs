@@ -6,13 +6,13 @@ use std::io::Read;
 use std::path::Path;
 
 use cddl_codegen::cli::Cli;
-use rocket::{Build, Rocket};
 use rocket::form::Form;
-use rocket::fs::{FileServer, NamedFile, relative, TempFile};
+use rocket::fs::{relative, FileServer, NamedFile, TempFile};
 use rocket::serde::{json::Json, Serialize};
+use rocket::{Build, Rocket};
 use tempfile::tempdir;
 
-use codegen::{GEN_ZIP_FILE, generate_code};
+use codegen::{generate_code, GEN_ZIP_FILE};
 
 use crate::validation::ValidationType;
 
@@ -112,8 +112,7 @@ async fn generate(data: Form<Validation<'_>>) -> Result<NamedFile, GenerationErr
     let root = tempdir()?;
     let mut args = Cli::default();
     generate_code(root.path(), data.cddl, &mut args)?;
-    let file = NamedFile::open(root.path().join(GEN_ZIP_FILE).as_path())
-        .await?;
+    let file = NamedFile::open(root.path().join(GEN_ZIP_FILE).as_path()).await?;
     Ok(file)
 }
 
