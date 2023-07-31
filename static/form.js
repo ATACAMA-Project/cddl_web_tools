@@ -3,6 +3,7 @@ const jsonInput = json.querySelector("textarea");
 const cbor = document.getElementById("cbor");
 const cborInput = cbor.querySelector("input");
 const withExtra = document.querySelector("input[name='withExtra']");
+const readyText = document.getElementById("readyText");
 
 // handles the display changes when a tab is clicked
 function change(type) {
@@ -12,12 +13,12 @@ function change(type) {
     cbor.style.display = type === "cbor" ? "block" : "none";
     cborInput.required = type === "cbor";
 
+    readyText.innerHTML = type === "codegen" ? "Generate" : "Validate";
     handle = type === "codegen" ? download : submit;
 }
 
 const submitBtn = document.getElementById("submitBtn");
 const loadingText = document.getElementById("loadingText");
-const readyText = document.getElementById("readyText");
 const results = document.getElementById("results");
 const form = document.querySelector("form");
 
