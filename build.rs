@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use minify_html::{Cfg, minify as minify2};
+use minify_html::{minify as minify2, Cfg};
 
 use minifier::js::minify;
 
@@ -19,7 +19,9 @@ fn main() {
 }
 
 fn minify_and_write<F, C: AsRef<[u8]>>(fname: &str, minify_fn: F)
-    where F: Fn(String) -> C, {
+where
+    F: Fn(String) -> C,
+{
     let new_fname = generate_output_filename(fname);
     let contents = fs::read_to_string(fname).unwrap();
     let minified = minify_fn(contents);

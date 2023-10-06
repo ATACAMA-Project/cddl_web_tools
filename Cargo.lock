@@ -393,7 +393,7 @@ dependencies = [
 [[package]]
 name = "cddl-codegen"
 version = "0.1.0"
-source = "git+https://github.com/dcSpark/cddl-codegen?rev=2f13b321163d755030323045622f845ab2aadeea#2f13b321163d755030323045622f845ab2aadeea"
+source = "git+https://github.com/dcSpark/cddl-codegen?rev=9661c92#9661c92a7e6d970f88bfdc8e04d38def367a2e77"
 dependencies = [
  "cbor_event",
  "cddl",
@@ -402,6 +402,7 @@ dependencies = [
  "either",
  "nom",
  "once_cell",
+ "pathdiff",
  "quote",
  "syn 2.0.28",
  "which",
@@ -1586,6 +1587,12 @@ dependencies = [
  "rand_core",
  "subtle",
 ]
+
+[[package]]
+name = "pathdiff"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8835116a5c179084a830efb3adc117ab007512b535bc1a21c991d3b32a6b44dd"
 
 [[package]]
 name = "pbkdf2"

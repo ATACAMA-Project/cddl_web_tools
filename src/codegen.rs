@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 
 use cddl_codegen::cli::Cli;
 use cddl_codegen::generation::GenerationScope;
-use cddl_codegen::intermediate::{CDDLIdent, IntermediateTypes, RustIdent};
+use cddl_codegen::intermediate::{CDDLIdent, IntermediateTypes, RustIdent, ROOT_SCOPE};
 use cddl_codegen::parsing::{parse_rule, rule_ident, rule_is_scope_marker};
 use cddl_codegen::{dep_graph, parsing};
 use walkdir::{DirEntry, WalkDir};
@@ -15,7 +15,11 @@ use zip::write::FileOptions;
 
 pub const GEN_ZIP_FILE: &str = "gen.zip";
 
-pub fn generate_code(root: &Path, cddl_str: &str, args: &mut Cli) -> Result<OsString, Box<dyn Error>> {
+pub fn generate_code(
+    root: &Path,
+    cddl_str: &str,
+    args: &mut Cli,
+) -> Result<OsString, Box<dyn Error>> {
     args.static_dir = PathBuf::from("codegen/static");
     let gen_path = root.join("gen");
     args.output = gen_path.clone();
@@ -27,6 +31,8 @@ pub fn generate_code(root: &Path, cddl_str: &str, args: &mut Cli) -> Result<OsSt
         "lib",
         cddl_str
     );
+
+    let export_raw_bytes_encoding_trait = input_files_content.contains(parsing::RAW_BYTES_MARKER);
     // we also need to mark the extern marker to a placeholder struct that won't get codegened
     input_files_content.push_str(&format!("{} = [0]", parsing::EXTERN_MARKER));
     // and a raw bytes one too
@@ -34,11 +40,11 @@ pub fn generate_code(root: &Path, cddl_str: &str, args: &mut Cli) -> Result<OsSt
 
     // Plain group / scope marking
     let cddl = cddl::parser::cddl_from_str(&input_files_content, false)?;
-    //panic!("cddl: {:#.unwrap()}", cddl);
+    //panic!("cddl: {:#?}", cddl);
     let pv = cddl::ast::parent::ParentVisitor::new(&cddl)?;
     let mut types = IntermediateTypes::new();
     // mark scope and filter scope markers
-    let mut scope = "lib".to_owned();
+    let mut scope = ROOT_SCOPE.clone();
     let cddl_rules = cddl
         .rules
         .iter()
@@ -81,11 +87,13 @@ pub fn generate_code(root: &Path, cddl_str: &str, args: &mut Cli) -> Result<OsSt
     // Generating code from intermediate form
     let mut gen_scope = GenerationScope::new();
     gen_scope.generate(&types, args);
-    gen_scope.export(&types, args)?;
+    gen_scope.export(&types, export_raw_bytes_encoding_trait, args)?;
 
     let gen_zip = root.join(GEN_ZIP_FILE);
     let _ = generate_zip(
-        gen_path.to_str().ok_or("Failed to convert gen_path to str")?,
+        gen_path
+            .to_str()
+            .ok_or("Failed to convert gen_path to str")?,
         gen_zip.to_str().ok_or("Failed to convert gen_zip to str")?,
         zip::CompressionMethod::Deflated,
     )?;
@@ -130,7 +138,11 @@ where
     zip.finish().map_err(|e| e.into())
 }
 
-fn generate_zip(src_dir: &str, dst_file: &str, method: zip::CompressionMethod) -> Result<File, Box<dyn Error>> {
+fn generate_zip(
+    src_dir: &str,
+    dst_file: &str,
+    method: zip::CompressionMethod,
+) -> Result<File, Box<dyn Error>> {
     if !Path::new(src_dir).is_dir() {
         return Err(ZipError::FileNotFound.into());
     }

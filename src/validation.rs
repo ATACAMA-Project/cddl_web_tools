@@ -32,26 +32,30 @@ static FILENAME: &str = "cddl.cddl";
 
 pub fn validate_all(validation_type: ValidationType) -> Vec<(String, String)> {
     let libraries = if let ValidationType::Plain(..) = validation_type {
-        vec![ValidationLibrary::Cddl, ValidationLibrary::CddlCat, ValidationLibrary::Cuddle]
+        vec![
+            ValidationLibrary::Cddl,
+            ValidationLibrary::CddlCat,
+            ValidationLibrary::Cuddle,
+        ]
     } else {
         vec![ValidationLibrary::Cddl, ValidationLibrary::CddlCat]
     };
 
-    libraries.iter()
-        .filter_map(|library| {
-            match validate(library.clone(), validation_type.clone()) {
+    libraries
+        .iter()
+        .filter_map(
+            |library| match validate(library.clone(), validation_type.clone()) {
                 Err(err) => Some((library.to_string(), err)),
                 Ok(_) => None,
-            }
-        })
+            },
+        )
         .collect()
 }
 
 pub fn validate(library: ValidationLibrary, validation_type: ValidationType) -> Result<(), String> {
     match library {
         ValidationLibrary::Cddl => match validation_type {
-            ValidationType::Plain(cddl_str) => cddl_from_str(&cddl_str, false)
-                .map(|_| ()),
+            ValidationType::Plain(cddl_str) => cddl_from_str(&cddl_str, false).map(|_| ()),
             ValidationType::WithJson(cddl_str, json_str) => {
                 validate_json_from_str(&cddl_str, &json_str, None).map_err(|e| e.to_string())
             }

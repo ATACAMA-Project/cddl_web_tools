@@ -69,26 +69,32 @@ struct ValidationResponse {
 fn validate(validation_data: Form<Validation<'_>>) -> Json<Vec<ValidationResponse>> {
     let form_cddl = validation_data.cddl.to_string();
     let validation_type = match validation_data.with_extra {
-        PlainValidationType::CodeGen => return Json(vec![(ValidationResponse {
-            title: "Code generation:".to_string(),
-            message: "Invalid validation!".to_string(),
-        })]),
+        PlainValidationType::CodeGen => {
+            return Json(vec![
+                (ValidationResponse {
+                    title: "Code generation:".to_string(),
+                    message: "Invalid validation!".to_string(),
+                }),
+            ])
+        }
         PlainValidationType::Plain => ValidationType::Plain(form_cddl),
         PlainValidationType::WithJson => {
             ValidationType::WithJson(form_cddl, validation_data.json.to_string())
         }
-        PlainValidationType::WithCbor => ValidationType::WithCbor(
-            form_cddl,
-            get_temp_file_content(&validation_data.file),
-        ),
+        PlainValidationType::WithCbor => {
+            ValidationType::WithCbor(form_cddl, get_temp_file_content(&validation_data.file))
+        }
     };
 
-    Json(validation::validate_all(validation_type).iter()
-        .map(|data| ValidationResponse {
-            title: format!("{}:", data.0.clone()),
-            message: data.1.clone(),
-        })
-        .collect())
+    Json(
+        validation::validate_all(validation_type)
+            .iter()
+            .map(|data| ValidationResponse {
+                title: format!("{}:", data.0.clone()),
+                message: data.1.clone(),
+            })
+            .collect(),
+    )
 }
 
 #[derive(Responder)]
