@@ -7,11 +7,12 @@ edition = "2021"
 rocket = { version = "0.5.0-rc.3", features = ["json"] }
 cddl = "0.9.1"
 cddl-cat = "0.6.1"
-cuddle = { git = "https://github.com/hansl/cuddle/", rev = "8cead05" }
+cuddle = { git = "https://github.com/hansl/cuddle/", rev = "3b93e97" }
 cddl-codegen = { git = "https://github.com/dcSpark/cddl-codegen", rev = "9661c92" }
 tempfile = "3"
 zip = "0.6.4"
 walkdir = "2.3.3"
+once_cell = "1.18.0"
 
 [build-dependencies]
 minify-html = "0.11.0"

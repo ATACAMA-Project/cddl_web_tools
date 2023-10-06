@@ -418,6 +418,7 @@ dependencies = [
  "cuddle",
  "minifier",
  "minify-html",
+ "once_cell",
  "rocket",
  "tempfile",
  "walkdir",
@@ -703,7 +704,7 @@ dependencies = [
 [[package]]
 name = "cuddle"
 version = "0.1.0"
-source = "git+https://github.com/hansl/cuddle/?rev=8cead05#8cead05fa34b84b32051f50d319342a44ef30d76"
+source = "git+https://github.com/hansl/cuddle/?rev=3b93e97#3b93e97206b88e4557638bf50c80f817fb985002"
 dependencies = [
  "base64 0.21.2",
  "ciborium",
@@ -1466,7 +1467,7 @@ dependencies = [
 [[package]]
 name = "nom_cbor"
 version = "0.1.0"
-source = "git+https://github.com/hansl/cuddle/?rev=8cead05#8cead05fa34b84b32051f50d319342a44ef30d76"
+source = "git+https://github.com/hansl/cuddle/?rev=3b93e97#3b93e97206b88e4557638bf50c80f817fb985002"
 dependencies = [
  "base64 0.21.2",
  "ciborium",
